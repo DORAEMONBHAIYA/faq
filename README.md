@@ -1,33 +1,144 @@
-# AI-Powered FAQ Generator (Multi-Agent System)
+# 🚀 FAQ Generator using Multi-Agent AI
 
-An automated intelligence system that transforms static documents into structured FAQ resources using a multi-agent orchestration. This tool is designed to reduce the workload for support teams and content creators by extracting key information and formatting it for immediate use.
+An intelligent system that automatically generates FAQs from user-provided content (documents, text, or transcripts) using a multi-agent architecture.
 
-## 🚀 Features
+---
 
-- **Multi-Agent Orchestration**: Utilizes specialized agents to parse documents, generate contextually relevant questions, and verify answer accuracy.
-- **Support for Multiple Formats**: Effortlessly process PDF and DOCX files.
-- **Smart Caching**: Integrated MongoDB caching to store results, minimizing LLM API costs and improving response times for similar documents.
-- **Professional Export**: Download your generated FAQs as cleanly formatted PDF or DOCX files.
-- **Dockerized Setup**: Ready for deployment with a containerized environment.
+## 📌 Overview
+
+This project is designed to solve the problem of extracting meaningful FAQs from large chunks of content like:
+
+* PDFs
+* Articles
+* Lecture transcripts
+* Videos (via transcripts)
+
+Using a **multi-agent AI pipeline**, the system identifies key insights and converts them into concise, useful FAQ pairs.
+
+---
+
+## ✨ Features
+
+* 🤖 Multi-Agent Architecture (planner, extractor, generator)
+* 📄 Accepts raw text / documents
+* ❓ Generates high-quality question-answer pairs
+* ⚡ Fast and automated FAQ creation
+* 🧠 Context-aware responses
+* 📊 Scalable for large datasets
+
+---
+
+## 🧠 How It Works
+
+1. **Input Processing**
+
+   * User uploads or inputs text/document
+
+2. **Content Analysis Agent**
+
+   * Extracts key ideas and important segments
+
+3. **Question Generation Agent**
+
+   * Creates relevant questions
+
+4. **Answer Generation Agent**
+
+   * Generates accurate answers based on context
+
+5. **Output**
+
+   * Structured FAQ list
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Language**: Python 3.x
-- **LLM Provider**: DeepSeek (via API)
-- **Database**: MongoDB (for caching and storage)
-- **Document Processing**: PyPDF2, python-docx
-- **Containerization**: Docker
+* Python 🐍
+* LLM APIs (OpenAI / Claude / etc.)
+* NLP Techniques
+* Multi-Agent Workflow
 
-## 📦 Installation & Setup
+---
 
-### Prerequisites
-- Docker & Docker Compose
-- DeepSeek API Key
-- MongoDB Instance (Local or Atlas)
+## 📂 Project Structure
 
-### Local Development
+```
+faq-generator/
+│── agents/              # Multi-agent logic  
+│── utils/               # Helper functions  
+│── data/                # Sample inputs  
+│── main.py              # Entry point  
+│── requirements.txt     # Dependencies  
+│── README.md  
+```
 
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/DORAEMONBHAIYA/faq.git](https://github.com/DORAEMONBHAIYA/faq.git)
-   cd faq
+---
+
+## ⚙️ Installation
+
+```bash
+git clone https://github.com/your-username/faq-generator.git
+cd faq-generator
+pip install -r requirements.txt
+```
+
+---
+
+## ▶️ Usage
+
+```bash
+python main.py
+```
+
+Or integrate with your frontend / API.
+
+---
+
+## 📸 Example Output
+
+```
+Q: What is the purpose of this system?  
+A: It automatically generates FAQs from long-form content.  
+
+Q: How does it work?  
+A: It uses multiple AI agents to analyze, generate questions, and produce answers.  
+```
+
+---
+
+## 🚧 Future Improvements
+
+* 🌐 Web UI integration
+* 📹 Direct video input processing
+* 📊 FAQ ranking & scoring
+* 🔍 Semantic search over generated FAQs
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repo
+2. Create a new branch
+3. Commit your changes
+4. Submit a PR
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 👨‍💻 Author
+
+**Akshat Gupta**
+
+---
+
+## ⭐ Support
+
+If you like this project, give it a ⭐ on GitHub!
