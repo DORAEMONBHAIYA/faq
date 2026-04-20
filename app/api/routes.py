@@ -13,12 +13,6 @@ router = APIRouter()
 # =========================
 source_manager = SourceManagerAgent()
 
-
-# =========================
-# IN-MEMORY SOURCE STORAGE
-# =========================
-INGESTED_SOURCES: Dict[str, dict] = {}
-
 UPLOAD_DIR = "data/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -28,8 +22,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 @router.get("/")
 def health():
     return {
-        "status": "AquilaFAQ running",
-        "sources_loaded": len(INGESTED_SOURCES)
+        "status": "AquilaFAQ running with MongoDB"
     }
 
 # =========================
@@ -48,12 +41,12 @@ async def ingest_document(file: UploadFile = File(...)):
     with open(file_path, "wb") as f:
         f.write(await file.read())
 
-    source_data = source_manager.ingest_document(file_path)
-    INGESTED_SOURCES[source_data["source_id"]] = source_data
+    # Source manager now handles DB storage
+    source_id = source_manager.ingest_document(file_path)
 
     return {
         "message": "Document ingested successfully",
-        "source_id": source_data["source_id"],
+        "source_id": source_id,
         "type": "document"
     }
 
@@ -68,14 +61,13 @@ def ingest_web(url: str):
             detail="Invalid URL"
         )
 
-    source_data = source_manager.ingest_web(url)
-    INGESTED_SOURCES[source_data["source_id"]] = source_data
+    # Source manager now handles DB storage
+    source_id = source_manager.ingest_web(url)
 
     return {
         "message": "Web content ingested successfully",
-        "source_id": source_data["source_id"],
-        "type": "web",
-        "domain": source_data.get("domain")
+        "source_id": source_id,
+        "type": "web"
     }
 
 # =========================
@@ -83,10 +75,12 @@ def ingest_web(url: str):
 # =========================
 @router.post("/generate/faq")
 def generate_faq(source_id: str, num_faqs: int = 5):
-    if source_id not in INGESTED_SOURCES:
+    # Fetch source from MongoDB via source_manager
+    source_data = source_manager.get_source(source_id)
+    if not source_data:
         raise HTTPException(
             status_code=404,
-            detail="Source ID not found"
+            detail="Source ID not found in database"
         )
 
     if num_faqs < 1 or num_faqs > 20:
@@ -95,12 +89,13 @@ def generate_faq(source_id: str, num_faqs: int = 5):
             detail="num_faqs must be between 1 and 20"
         )
 
+    # Task manager now handles DB storage
     task_id = task_manager.create_task()
 
     # Start background processing
     start_task(
         task_id=task_id,
-        source_data=INGESTED_SOURCES[source_id],
+        source_data=source_data,
         num_faqs=num_faqs
     )
 
@@ -115,6 +110,7 @@ def generate_faq(source_id: str, num_faqs: int = 5):
 # =========================
 @router.get("/results/{task_id}")
 def get_results(task_id: str):
+    # Task manager handles DB lookup
     task = task_manager.get(task_id)
 
     if not task:

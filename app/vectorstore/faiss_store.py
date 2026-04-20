@@ -15,3 +15,6 @@ class FAISSStore:
             np.array([query_embedding]).astype("float32"), top_k
         )
         return [self.metadata[i] for i in I[0]]
+
+# Global store instance
+store = FAISSStore()

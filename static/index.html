@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquilaFAQ | Multi-Agent Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #10b981;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a 50%);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.4); }
+        }
+
+        /* Layout */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Glass Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 1s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        /* Form Elements */
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--glass);
+        }
+
+        .drop-zone:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .drop-zone i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: glow 3s infinite;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Status & Processing */
+        .status-container {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--glass);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .step {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--glass);
+        }
+
+        .step.active {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* FAQ Results */
+        .faq-list {
+            margin-top: 3rem;
+            display: none;
+        }
+
+        .faq-item {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.5s ease-out backwards;
+        }
+
+        .faq-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #818cf8;
+            margin-bottom: 0.75rem;
+        }
+
+        .faq-answer {
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        .faq-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            padding: 0.2rem 0.6rem;
+            border-radius: 100px;
+            font-weight: 600;
+        }
+
+        /* Hidden helpers */
+        #file-input { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AquilaFAQ</h1>
+            <p class="subtitle">Autonomous Multi-Agent Intelligence for Document-to-FAQ Generation. Speed-optimized for Gemma 3.</p>
+        </header>
+
+        <div id="setup-view">
+            <div class="card">
+                <div class="input-group">
+                    <label>Knowledge Source</label>
+                    <div class="drop-zone" onclick="document.getElementById('file-input').click()">
+                        <i>📄</i>
+                        <p id="file-label">Click to upload PDF or Docx</p>
+                        <input type="file" id="file-input" accept=".pdf,.docx">
+                    </div>
+                    <input type="url" id="url-input" placeholder="...or enter website URL (https://...)">
+                </div>
+
+                <div class="input-group">
+                    <label>FAQ Intensity (1-20)</label>
+                    <input type="range" id="count-input" min="1" max="20" value="5" style="width: 100%; margin-top: 0.5rem;">
+                    <p style="text-align: right; color: var(--text-dim); margin-top: 0.5rem;"><span id="count-val">5</span> FAQs</p>
+                </div>
+
+                <button class="btn" onclick="startWorkflow()" id="main-btn">Initialize Generation</button>
+            </div>
+        </div>
+
+        <div id="processing-view" class="card status-container">
+            <div class="loader"></div>
+            <h2 id="status-text">Thinking...</h2>
+            <p class="subtitle" style="font-size: 1rem;">Aquila Agents are analyzing your document</p>
+            <div class="steps">
+                <div class="step active" id="step-1"></div>
+                <div class="step" id="step-2"></div>
+                <div class="step" id="step-3"></div>
+            </div>
+        </div>
+
+        <div id="results-view" class="faq-list">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2>Generated Intelligence</h2>
+                <button onclick="window.location.reload()" style="background: none; border: 1px solid var(--border); color: var(--text-dim); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">New Task</button>
+            </div>
+            <div id="faq-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const countInput = document.getElementById('count-input');
+        const countVal = document.getElementById('count-val');
+        countInput.oninput = () => countVal.innerText = countInput.value;
+
+        const fileInput = document.getElementById('file-input');
+        const fileLabel = document.getElementById('file-label');
+        fileInput.onchange = () => {
+            if (fileInput.files.length > 0) {
+                fileLabel.innerText = fileInput.files[0].name;
+                fileLabel.style.color = 'var(--accent)';
+            }
+        };
+
+        async function startWorkflow() {
+            const urlInput = document.getElementById('url-input').value;
+            const file = fileInput.files[0];
+            const numFaqs = countInput.value;
+            
+            let sourceId = "";
+
+            try {
+                // UI Switch
+                document.getElementById('setup-view').style.display = 'none';
+                document.getElementById('processing-view').style.display = 'block';
+                updateStatus("Ingesting Knowledge...", 1);
+
+                // Step 1: Ingest
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const res = await fetch('/ingest/document', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    sourceId = data.source_id;
+                } else if (urlInput) {
+                    const res = await fetch('/ingest/web', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ url: urlInput })
+                    });
+                    const data = await res.json();
+                    sourceId = data.source_id;
+                } else {
+                    alert("Please provide a file or URL");
+                    location.reload();
+                    return;
+                }
+
+                // Step 2: Generate
+                updateStatus("Orchestrating Agents...", 2);
+                const genRes = await fetch(`/generate/faq?source_id=${sourceId}&num_faqs=${numFaqs}`, { method: 'POST' });
+                const genData = await genRes.json();
+                const taskId = genData.task_id;
+
+                // Step 3: Poll
+                pollTask(taskId);
+
+            } catch (err) {
+                console.error(err);
+                alert("Critical Error. Check console.");
+                location.reload();
+            }
+        }
+
+        async function pollTask(taskId) {
+            updateStatus("Refining Q&A Knowledge...", 3);
+            
+            const timer = setInterval(async () => {
+                const res = await fetch(`/results/${taskId}`);
+                const data = await res.json();
+
+                if (data.status === 'completed') {
+                    clearInterval(timer);
+                    showResults(data.result);
+                } else if (data.status === 'failed') {
+                    clearInterval(timer);
+                    alert("Generation failed: " + JSON.stringify(data.result));
+                    location.reload();
+                }
+            }, 2000);
+        }
+
+        function updateStatus(text, step) {
+            document.getElementById('status-text').innerText = text;
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`step-${i}`).className = i <= step ? 'step active' : 'step';
+            }
+        }
+
+        function showResults(faqs) {
+            document.getElementById('processing-view').style.display = 'none';
+            document.getElementById('results-view').style.display = 'block';
+            
+            const container = document.getElementById('faq-container');
+            container.innerHTML = "";
+
+            faqs.forEach((faq, index) => {
+                const div = document.createElement('div');
+                div.className = 'faq-item';
+                div.style.animationDelay = `${index * 0.1}s`;
+                div.innerHTML = `
+                    <div class="faq-question">${faq.question}</div>
+                    <div class="faq-answer">${faq.answer}</div>
+                    <div class="faq-meta">
+                        <span>Confidence: <span class="badge">${Math.round(faq.confidence * 100)}%</span></span>
+                        <span>Source: ${faq.sources[0].toUpperCase()}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+  "status": "completed",
+  "result": [
+    {
+      "question": "What does Artificial Intelligence (AI) refer to?\n\n\n\n",
+      "answer": "Simulation of human intelligence in machines.",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Fast pass"
+      },
+      "sources": [
+        "doc"
+      ]
+    },
+    {
+      "question": "Here's one clear question extracted from the text:\n\n**What are some of the applications of AI?** \n\n(The text directly *lists* applications of AI, making this a natural question to ask.)\n\n\n\n",
+      "answer": "Healthcare, finance, transportation, and education.\n\n\n\n",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Fast pass"
+      },
+      "sources": [
+        "doc"
+      ]
+    },
+    {
+      "question": "What are some of the challenges currently facing the development of AI?\n\n\n\n",
+      "answer": "Data privacy, ethical concerns, bias, and explainability.",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Fast pass"
+      },
+      "sources": [
+        "doc"
+      ]
+    },
+    {
+      "question": "What are some common approaches to machine learning?\n\n\n\n",
+      "answer": "Supervised learning, unsupervised learning, and reinforcement learning.",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Fast pass"
+      },
+      "sources": [
+        "doc"
+      ]
+    },
+    {
+      "question": "What is Deep Learning? \n\n",
+      "answer": "A specialized branch of machine learning using neural networks with many layers.",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Fast pass"
+      },
+      "sources": [
+        "doc"
+      ]
+    }
+  ]
+}

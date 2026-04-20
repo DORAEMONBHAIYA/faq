@@ -1,0 +1,65 @@
+{
+  "status": "completed",
+  "result": [
+    {
+      "question": "What is Machine Learning?",
+      "answer": "Machine Learning is a subset of Artificial Intelligence (AI) that focuses on enabling systems to learn and improve from experience without explicit programming. It encompasses various approaches, including supervised learning, unsupervised learning, and reinforcement learning, to achieve this adaptive capability. Therefore, Machine Learning allows systems to develop intelligence through data rather than direct instruction.\n\n\n\n",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Context-verified"
+      },
+      "sources": [
+        "doc"
+      ]
+    },
+    {
+      "question": "What is Artificial Intelligence?",
+      "answer": "Artificial Intelligence (AI) is defined as the simulation of human intelligence in machines, specifically those programmed to think and act like humans. This field encompasses a variety of applications, including expert systems, natural language processing, speech recognition, and machine vision, as demonstrated in the provided documentation. Therefore, AI focuses on creating machines capable of intelligent behavior.\n\n\n\n",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Context-verified"
+      },
+      "sources": [
+        "doc"
+      ]
+    },
+    {
+      "question": "What challenges does AI face?",
+      "answer": "According to the provided text, Artificial Intelligence currently faces challenges including data privacy, ethical concerns, bias, and explainability. These hurdles exist despite the rapid advancements being made in the field, and ongoing efforts are focused on addressing them to ensure responsible development and implementation of AI technologies. Therefore, overcoming these challenges is crucial for the continued progress and acceptance of AI.\n\n\n\n",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Context-verified"
+      },
+      "sources": [
+        "doc"
+      ]
+    },
+    {
+      "question": "What are the applications of AI?",
+      "answer": "According to the provided documentation, Artificial Intelligence (AI) has diverse applications across multiple sectors. These include utilization in healthcare for disease detection, finance for fraud detection, transportation for autonomous vehicles, and education for personalized learning systems, among others like expert systems, natural language processing, speech recognition, and machine vision. Therefore, AI is employed to solve complex problems and enhance processes in a variety of fields.\n\n\n\n",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Context-verified"
+      },
+      "sources": [
+        "doc"
+      ]
+    },
+    {
+      "question": "What is Deep Learning?",
+      "answer": "Deep Learning is a specialized area within machine learning that utilizes neural networks with multiple layers to analyze data. It is commonly applied to complex tasks such as image recognition, speech processing, and natural language understanding, as detailed in the provided documentation. Therefore, it represents a focused approach to enabling systems to learn from data without explicit programming.\n\n\n\n",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Context-verified"
+      },
+      "sources": [
+        "doc"
+      ]
+    }
+  ]
+}

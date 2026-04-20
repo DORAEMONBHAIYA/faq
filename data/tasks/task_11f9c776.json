@@ -1,0 +1,65 @@
+{
+  "status": "completed",
+  "result": [
+    {
+      "question": "What is Artificial Intelligence (AI)?",
+      "answer": "Artificial Intelligence (AI) is the simulation of human intelligence in machines programmed to think and act like humans. It encompasses applications like expert systems, natural language processing, and machine vision.",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Self-audited"
+      },
+      "sources": [
+        "web"
+      ]
+    },
+    {
+      "question": "What is machine learning and how does it differ from traditional programming?",
+      "answer": "Machine learning is a subset of Artificial Intelligence (AI) enabling systems to learn from data without explicit programming. Unlike traditional programming, which requires explicit instructions for every scenario, machine learning algorithms improve performance with experience.",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Self-audited"
+      },
+      "sources": [
+        "web"
+      ]
+    },
+    {
+      "question": "What is deep learning and what is it commonly used for?",
+      "answer": "Deep Learning is a specialized field within machine learning utilizing multi-layered neural networks. It\u2019s commonly used for applications like image recognition, speech processing, and natural language understanding.",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Self-audited"
+      },
+      "sources": [
+        "web"
+      ]
+    },
+    {
+      "question": "What are some key real-world applications of artificial intelligence?",
+      "answer": "AI is applied across diverse sectors including healthcare (disease detection), finance (fraud detection), transportation (autonomous vehicles), and education (personalized learning systems).",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Self-audited"
+      },
+      "sources": [
+        "web"
+      ]
+    },
+    {
+      "question": "What are the primary challenges currently facing AI development, and what is the focus for its future advancement?",
+      "answer": "**Q: What are the primary challenges currently facing AI development, and what is the focus for its future advancement?**\n\n**A:** Current challenges include data privacy, ethical concerns, bias in algorithms, and a lack of explainability (\u201cblack box\u201d problem). Future advancement focuses on responsible AI development, increased transparency, and fostering effective human-AI collaboration.\n\n\n\n",
+      "confidence": 0.95,
+      "audit": {
+        "is_supported": true,
+        "reasoning": "Self-audited"
+      },
+      "sources": [
+        "web"
+      ]
+    }
+  ]
+}

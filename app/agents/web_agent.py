@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 
-MAX_WORDS = 2500   # 🔥 HARD LIMIT (speed control)
+from app.config import MAX_WEB_WORDS
 
 class WebAgent:
     def ingest(self, url: str) -> dict:
@@ -31,10 +31,10 @@ class WebAgent:
         words_collected = []
         for p in paragraphs:
             words_collected.extend(p.split())
-            if len(words_collected) >= MAX_WORDS:
+            if len(words_collected) >= MAX_WEB_WORDS:
                 break
 
-        clean_text = " ".join(words_collected[:MAX_WORDS])
+        clean_text = " ".join(words_collected[:MAX_WEB_WORDS])
 
         return {
             "source_id": web_id,

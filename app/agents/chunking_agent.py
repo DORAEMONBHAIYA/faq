@@ -1,11 +1,12 @@
 from sentence_transformers import SentenceTransformer
 import uuid
+from app.config import CHUNK_SIZE
 
 class ChunkingAgent:
     def __init__(self):
         self.model = SentenceTransformer("all-MiniLM-L6-v2")
 
-    def chunk(self, source_data: dict, chunk_size=250):
+    def chunk(self, source_data: dict, chunk_size=CHUNK_SIZE):
         chunks = []
 
         for block in source_data["content"]:
