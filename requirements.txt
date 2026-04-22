@@ -6,7 +6,7 @@ requests
 beautifulsoup4
 pymongo[srv]
 httpx
-jose
+python-jose[cryptography]
 passlib[sha256_crypt]
 pydantic
 pydantic-settings
