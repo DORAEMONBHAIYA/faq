@@ -16,6 +16,10 @@ class MongoDBClient:
         if cls._instance is None:
             cls._instance = super(MongoDBClient, cls).__new__(cls)
             try:
+                # 🕵️ Debug: Print masked URI
+                masked_uri = MONGODB_URI.split('@')[-1] if '@' in MONGODB_URI else MONGODB_URI
+                print(f"DEBUG: Attempting connection to: ...@{masked_uri}")
+
                 cls._instance.client = MongoClient(
                     MONGODB_URI, 
                     serverSelectionTimeoutMS=5000,
