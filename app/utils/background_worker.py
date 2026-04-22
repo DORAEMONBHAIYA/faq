@@ -37,13 +37,13 @@ async def _async_faq_task(task_id: str, source_data: dict, num_faqs: int, target
         # Note: We update the source_name in the DB record
         task_manager.collection.update_one({"task_id": task_id}, {"$set": {"source_name": ai_title}})
 
-        embeddings = chunker.embed(chunks)
+        embeddings = await chunker.embed(chunks)
         private_store.add(embeddings, chunks)
         
         # 2. DOMAIN-AWARE RETRIEVAL (Semantic Search in private store)
         task_manager.update(task_id, "processing", trace_entry={"agent": "RetrievalAgent", "action": f"Searching for {target_domain} content"})
         
-        domain_query_embedding = chunker.embed([target_domain])[0]
+        domain_query_embedding = (await chunker.embed([target_domain]))[0]
         selected_chunks = private_store.search(domain_query_embedding, top_k=min(num_faqs + 2, len(chunks)))
 
         # 3. BATCH GENERATION (Strictly guided by domain)

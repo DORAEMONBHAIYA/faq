@@ -1,15 +1,14 @@
-from sentence_transformers import SentenceTransformer
+import httpx
 import uuid
-from app.config import CHUNK_SIZE
+import asyncio
+from app.config import GEMINI_API_KEY, CHUNK_SIZE
 
 class ChunkingAgent:
     def __init__(self):
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.api_key = GEMINI_API_KEY
 
     def chunk(self, source_data: dict, chunk_size=CHUNK_SIZE):
         chunks = []
-
-        # source_data["content"] is a list of blocks from DocAgent/WebAgent
         for block in source_data["content"]:
             words = block["text"].split()
             for i in range(0, len(words), chunk_size):
@@ -21,15 +20,27 @@ class ChunkingAgent:
                 })
         return chunks
 
-    def embed(self, inputs: list):
-        """Handle both list of strings or list of chunk dictionaries."""
+    async def embed(self, inputs: list):
+        """Uses Gemini Embedding API to save RAM."""
         if not inputs:
             return []
         
-        if isinstance(inputs[0], dict):
-            texts = [c["text"] for c in inputs]
-        else:
-            texts = inputs # List of strings
+        texts = [c["text"] if isinstance(c, dict) else c for c in inputs]
+        
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/embedding-001:batchEmbedContents?key={self.api_key}"
+        
+        # Batching for Gemini (Max 100 per call)
+        all_embeddings = []
+        for i in range(0, len(texts), 100):
+            batch = texts[i:i+100]
+            payload = {
+                "requests": [{"model": "models/embedding-001", "content": {"parts": [{"text": t}]}} for t in batch]
+            }
             
-        embeddings = self.model.encode(texts)
-        return embeddings
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                res = await client.post(url, json=payload)
+                res.raise_for_status()
+                data = res.json()
+                all_embeddings.extend([e["values"] for e in data["embeddings"]])
+                
+        return all_embeddings
