@@ -14,3 +14,5 @@ pydantic-settings
 pydantic[email]
 faiss-cpu
 numpy
+pdfplumber
+dnspython
