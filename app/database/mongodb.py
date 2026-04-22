@@ -1,6 +1,6 @@
 import os
 import logging
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,23 +16,27 @@ class MongoDBClient:
         if cls._instance is None:
             cls._instance = super(MongoDBClient, cls).__new__(cls)
             try:
-                # 🌐 Connection for Atlas or Local
                 cls._instance.client = MongoClient(
                     MONGODB_URI, 
-                    serverSelectionTimeoutMS=5000, # 5s timeout
+                    serverSelectionTimeoutMS=5000,
                     connectTimeoutMS=10000
                 )
-                # Force a connection check
                 cls._instance.client.admin.command('ping')
                 cls._instance.db = cls._instance.client[DB_NAME]
-                print(f"SUCCESS: Connected to MongoDB at {MONGODB_URI[:20]}...")
+                
+                # 🛠️ Setup TTL Indexes (7 days = 604800 seconds)
+                cls._instance.db.sources.create_index("expires_at", expireAfterSeconds=0)
+                cls._instance.db.tasks.create_index("expires_at", expireAfterSeconds=0)
+                
+                # 🛠️ Setup User Indexes
+                cls._instance.db.users.create_index("email", unique=True)
+                cls._instance.db.tasks.create_index([("user_id", ASCENDING), ("created_at", ASCENDING)])
+                cls._instance.db.sources.create_index([("user_id", ASCENDING), ("created_at", ASCENDING)])
+                
+                print(f"SUCCESS: Connected to MongoDB and initialized TTL indexes.")
             except Exception as e:
                 print(f"ERROR: Failed to connect to MongoDB: {e}")
-                print("ADVICE: Ensure your MONGODB_URI in .env is correct (Atlas or Local)")
-                # We still assign instance to avoid attribute errors, 
-                # but operations will fail gracefully with clear errors later
                 cls._instance.db = None
         return cls._instance
 
-# Global database access
 db = MongoDBClient().db

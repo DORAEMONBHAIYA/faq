@@ -1,58 +1,54 @@
 import time
 import asyncio
 import httpx
+import json
 from app.config import GEMINI_API_KEY, GEMINI_MODEL
+
+# Global Rate Limiter
+class RateLimiter:
+    def __init__(self, max_rpm=30):
+        self.semaphore = asyncio.Semaphore(5)
+        self.max_rpm = max_rpm
+        self.requests = []
+
+    async def wait_if_needed(self):
+        async with self.semaphore:
+            now = time.time()
+            self.requests = [r for r in self.requests if now - r < 60]
+            
+            if len(self.requests) >= self.max_rpm:
+                wait_time = 60 - (now - self.requests[0]) + 1
+                print(f"RPM Safety: Waiting {wait_time:.1f}s")
+                await asyncio.sleep(wait_time)
+            
+            self.requests.append(time.time())
+
+limiter = RateLimiter(max_rpm=30)
 
 class LLMClient:
     def __init__(self):
         self.api_key = GEMINI_API_KEY
         self.model = GEMINI_MODEL
 
-        if not self.api_key:
-            raise RuntimeError("GEMINI_API_KEY not set in .env")
-        print(f"LLMClient initialized using Gemini model: {self.model}")
-
     async def chat(self, messages, temperature=0.3, retries=3):
-        """Asynchronous Gemini Native API implementation."""
+        await limiter.wait_if_needed()
         contents = []
         for m in messages:
             role = "user" if m["role"] in ["user", "system"] else "model"
-            contents.append({
-                "role": role,
-                "parts": [{"text": m["content"]}]
-            })
+            contents.append({"role": role, "parts": [{"text": m["content"]}]})
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
-        payload = {
-            "contents": contents,
-            "generationConfig": {
-                "temperature": temperature,
-                "maxOutputTokens": 1024,
-            }
-        }
-
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        async with httpx.AsyncClient(timeout=120.0) as client:
             for attempt in range(retries + 1):
                 try:
-                    response = await client.post(url, json=payload)
-                    
+                    response = await client.post(url, json={"contents": contents, "generationConfig": {"temperature": temperature, "maxOutputTokens": 2048}})
                     if response.status_code == 429:
-                        wait = (attempt + 1) * 3
-                        print(f"Rate limit hit. Waiting {wait}s...")
-                        await asyncio.sleep(wait)
+                        await asyncio.sleep((attempt + 1) * 5)
                         continue
-                    
                     response.raise_for_status()
                     data = response.json()
-                    
-                    if "candidates" in data and data["candidates"]:
-                        return data["candidates"][0]["content"]["parts"][0]["text"]
-                    
-                    if "error" in data:
-                        raise RuntimeError(f"Gemini Error: {data['error']['message']}")
-                    
-                    raise RuntimeError("Gemini error: Empty candidates")
-                except Exception as e:
+                    return data["candidates"][0]["content"]["parts"][0]["text"]
+                except Exception:
                     if attempt < retries:
                         await asyncio.sleep(2)
                         continue
@@ -62,7 +58,18 @@ class LLMClient:
         if "JSON" not in messages[0]["content"]:
             messages[0]["content"] += " Return valid JSON."
         raw = await self.chat(messages, temperature=temperature)
+        
+        # Super aggressive JSON cleaning
         clean = raw.strip()
-        if clean.startswith("```json"): clean = clean[7:]
-        if clean.endswith("```"): clean = clean[:-3]
-        return clean.strip()
+        if "```json" in clean:
+            clean = clean.split("```json")[1].split("```")[0].strip()
+        elif "```" in clean:
+            clean = clean.split("```")[1].split("```")[0].strip()
+        
+        # Remove potential preamble/postamble
+        start = clean.find("{")
+        end = clean.rfind("}")
+        if start != -1 and end != -1:
+            clean = clean[start:end+1]
+            
+        return clean

@@ -1,126 +1,171 @@
 import os
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from typing import Dict
+from datetime import datetime
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Header
+from typing import Dict, List, Optional
+from pydantic import BaseModel
 
 from app.agents.source_manager import SourceManagerAgent
+from app.agents.domain_agent import DomainAgent
 from app.utils.task_manager import task_manager
 from app.utils.background_worker import start_task
+from app.auth.auth_handler import decode_access_token, get_password_hash, verify_password, create_access_token
+from app.database.mongodb import db
 
 router = APIRouter()
-
-# =========================
-# INITIALIZE CORE OBJECTS
-# =========================
 source_manager = SourceManagerAgent()
+domain_agent = DomainAgent()
 
-UPLOAD_DIR = "data/uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+from pydantic import BaseModel, EmailStr
+
+# 🛡️ Auth Models
+class UserAuth(BaseModel):
+    name: Optional[str] = None
+    email: EmailStr
+    password: str
+    confirm_password: Optional[str] = None
+
+class WebIngest(BaseModel):
+    url: str
+
+# 🛡️ Dependency to get current user
+async def get_current_user(authorization: Optional[str] = Header(None)):
+    if not authorization:
+        return None
+    token = authorization.split(" ")[-1]
+    payload = decode_access_token(token)
+    if not payload:
+        return None
+    return payload.get("sub") # returns email as user_id
 
 # =========================
-# HEALTH CHECK
+# AUTH ENDPOINTS
 # =========================
-@router.get("/")
-def health():
-    return {
-        "status": "AquilaFAQ running with MongoDB"
-    }
+@router.post("/auth/signup")
+async def signup(user: UserAuth):
+    email = user.email.lower()
+    if user.password != user.confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
+    
+    if db.users.find_one({"email": email}):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    hashed_pw = get_password_hash(user.password)
+    db.users.insert_one({
+        "name": user.name,
+        "email": email, 
+        "password": hashed_pw,
+        "created_at": datetime.utcnow()
+    })
+    return {"message": "User created successfully"}
+
+@router.post("/auth/login")
+async def login(user: UserAuth):
+    email = user.email.lower()
+    db_user = db.users.find_one({"email": email})
+    if not db_user or not verify_password(user.password, db_user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    token = create_access_token({"sub": email})
+    return {"access_token": token, "token_type": "bearer"}
 
 # =========================
 # DOCUMENT INGESTION
 # =========================
 @router.post("/ingest/document")
-async def ingest_document(file: UploadFile = File(...)):
-    if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(
-            status_code=400,
-            detail="Only PDF files are supported"
-        )
+async def ingest_document(file: UploadFile = File(...), user_id: str = Depends(get_current_user)):
+    # 📏 Limit size to 3MB
+    MAX_SIZE = 3 * 1024 * 1024
+    content = await file.read()
+    if len(content) > MAX_SIZE:
+        raise HTTPException(status_code=400, detail="File too large (Max 3MB)")
 
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    # 🛡️ SECURITY: Use system temp directory instead of local data folder
+    import tempfile
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(content)
+        temp_path = tmp.name
 
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
+    try:
+        # Ingest and store
+        source_id = source_manager.ingest_document(temp_path, user_id=user_id)
+        source_data = source_manager.get_source(source_id)
+        
+        # Detect dynamic topics
+        topics = await domain_agent.detect_topics(source_data["content"])
 
-    # Source manager now handles DB storage
-    source_id = source_manager.ingest_document(file_path)
+        return {
+            "message": "Document ingested successfully",
+            "source_id": source_id,
+            "topics": topics,
+            "filename": file.filename,
+            "size": f"{len(content)/1024:.1f} KB"
+        }
+    finally:
+        # 🛡️ ALWAYS cleanup temp file
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
 
-    return {
-        "message": "Document ingested successfully",
-        "source_id": source_id,
-        "type": "document"
-    }
-
-# =========================
-# WEB INGESTION
-# =========================
 @router.post("/ingest/web")
-def ingest_web(url: str):
-    if not url.startswith("http"):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid URL"
-        )
-
-    # Source manager now handles DB storage
-    source_id = source_manager.ingest_web(url)
+async def ingest_web(data: WebIngest, user_id: str = Depends(get_current_user)):
+    source_id = source_manager.ingest_web(data.url, user_id=user_id)
+    source_data = source_manager.get_source(source_id)
+    topics = await domain_agent.detect_topics(source_data["content"])
 
     return {
-        "message": "Web content ingested successfully",
         "source_id": source_id,
-        "type": "web"
+        "topics": topics,
+        "url": data.url
     }
 
 # =========================
-# FAQ GENERATION (ASYNC)
+# FAQ GENERATION
 # =========================
 @router.post("/generate/faq")
-def generate_faq(source_id: str, num_faqs: int = 5):
-    # Fetch source from MongoDB via source_manager
+async def generate_faq(source_id: str, num_faqs: int = 5, target_domain: str = "auto", user_id: str = Depends(get_current_user)):
     source_data = source_manager.get_source(source_id)
     if not source_data:
-        raise HTTPException(
-            status_code=404,
-            detail="Source ID not found in database"
-        )
-
-    if num_faqs < 1 or num_faqs > 20:
-        raise HTTPException(
-            status_code=400,
-            detail="num_faqs must be between 1 and 20"
-        )
-
-    # Task manager now handles DB storage
-    task_id = task_manager.create_task()
-
-    # Start background processing
-    start_task(
-        task_id=task_id,
-        source_data=source_data,
-        num_faqs=num_faqs
-    )
-
-    return {
-        "message": "FAQ generation started",
-        "task_id": task_id,
-        "status": "queued"
-    }
+        raise HTTPException(status_code=404, detail="Source not found")
+    
+    # Extract friendly name for history
+    source_name = source_data.get("filename") or source_data.get("url") or "Document"
+    
+    task_id = task_manager.create_task(user_id=user_id, source_name=source_name)
+    start_task(task_id=task_id, source_data=source_data, num_faqs=num_faqs, target_domain=target_domain)
+    
+    return {"task_id": task_id}
 
 # =========================
-# FETCH RESULTS
+# HISTORY & RESULTS
 # =========================
+@router.get("/user/history")
+async def get_history(user_id: str = Depends(get_current_user)):
+    if not user_id:
+        return []
+    return task_manager.get_user_tasks(user_id)
+
+@router.delete("/task/{task_id}")
+async def delete_task(task_id: str, user_id: str = Depends(get_current_user)):
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    success = task_manager.delete_task(task_id, user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Task not found or not owned by user")
+    return {"message": "Task deleted successfully"}
+
 @router.get("/results/{task_id}")
-def get_results(task_id: str):
-    # Task manager handles DB lookup
+async def get_results(task_id: str, user_id: str = Depends(get_current_user)):
     task = task_manager.get(task_id)
-
     if not task:
-        raise HTTPException(
-            status_code=404,
-            detail="Task ID not found"
-        )
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # 🛡️ SECURITY: Ensure privacy (Users can only see their own tasks)
+    if task.get("user_id") and task["user_id"] != user_id:
+        raise HTTPException(status_code=403, detail="Access denied to this task")
+        
+    return task
 
-    return {
-        "task_id": task_id,
-        "status": task["status"],
-        "result": task.get("result")
-    }
+@router.get("/health")
+def health():
+    return {"status": "ok"}

@@ -1,103 +1,84 @@
 import logging
 import asyncio
-import time
 from threading import Thread
 
 from app.utils.task_manager import task_manager
 from app.agents.chunking_agent import ChunkingAgent
-from app.agents.question_agent import QuestionAgent
-from app.agents.answer_agent import AnswerAgent
-from app.agents.validation_agent import ValidationAgent
-from app.agents.audit_agent import AuditAgent
-from app.agents.refinement_agent import RefinementAgent
-from app.vectorstore.faiss_store import store
+from app.agents.domain_agent import DomainAgent
+from app.agents.super_agent import SuperAgent
+from app.agents.refiner_agent import RefinerAgent
+from app.vectorstore.faiss_store import FAISSStore # Import class, not global instance
 from app.config import CHUNK_SIZE
 
 logger = logging.getLogger("BackgroundWorker")
-logging.basicConfig(level=logging.INFO)
 
-# =========================
-# SINGLETON AGENTS
-# =========================
 chunker = ChunkingAgent()
-q_agent = QuestionAgent()
-a_agent = AnswerAgent()
-v_agent = ValidationAgent()
-audit_agent = AuditAgent()
-refine_agent = RefinementAgent()
+domain_agent = DomainAgent()
+super_agent = SuperAgent()
+refine_agent = RefinerAgent()
 
-def run_faq_task(task_id: str, source_data: dict, num_faqs: int):
-    """Entry point for the background thread."""
-    asyncio.run(_async_faq_task(task_id, source_data, num_faqs))
-
-async def _async_faq_task(task_id: str, source_data: dict, num_faqs: int):
-    """The actual async logic for FAQ generation."""
+async def _async_faq_task(task_id: str, source_data: dict, num_faqs: int, target_domain: str = "auto"):
     try:
-        logger.info(f"Starting FAQ task {task_id}")
-        task_manager.update(task_id, "processing")
+        # 🛡️ ISOLATION: Create a fresh, private vector store for THIS specific task
+        # This prevents data leakage from previous runs or other users.
+        private_store = FAISSStore()
+        
+        task_manager.update(task_id, "processing", trace_entry={"agent": "Orchestrator", "action": "Analyzing Document Structure"})
 
-        # 1. Chunking (Sync)
+        # 1. RAG PREP
         chunks = chunker.chunk(source_data, chunk_size=CHUNK_SIZE)
-        if not chunks: raise RuntimeError("No text found")
+        if not chunks:
+            raise ValueError("No content found in source. Please check the URL or File.")
+            
+        # 🧪 NEW: Generate Catchy AI Title
+        task_manager.update(task_id, "processing", trace_entry={"agent": "DomainAgent", "action": "Naming your session"})
+        ai_title = await domain_agent.generate_title(chunks[0]["text"])
+        task_manager.update(task_id, "processing", domain={"source_name": ai_title})
+        # Note: We update the source_name in the DB record
+        task_manager.collection.update_one({"task_id": task_id}, {"$set": {"source_name": ai_title}})
 
-        # 2. Embedding (Sync but fast)
         embeddings = chunker.embed(chunks)
-        store.add(embeddings, chunks)
-
-        # 3. Question Extraction (Async)
-        logger.info("Step 3: Extracting questions...")
-        step = max(1, len(chunks) // num_faqs)
-        selected_chunks = [chunks[i] for i in range(0, len(chunks), step)][:num_faqs]
+        private_store.add(embeddings, chunks)
         
-        # Parallel Async calls
-        q_tasks = [q_agent.llm.chat([
-            {"role": "system", "content": "You are a precise FAQ extractor. Extract ONLY the most important question from the text. Do not include any intro, conversational text, or formatting. Just the question string."},
-            {"role": "user", "content": f"Text:\n{c['text']}\n\nQuestion:"}
-        ], temperature=0.1) for c in selected_chunks]
+        # 2. DOMAIN-AWARE RETRIEVAL (Semantic Search in private store)
+        task_manager.update(task_id, "processing", trace_entry={"agent": "RetrievalAgent", "action": f"Searching for {target_domain} content"})
         
-        questions = await asyncio.gather(*q_tasks)
-        questions = [q.strip("-• *#\n").split("\n")[0] for q in questions if "?" in q]
-        questions = list(set(questions))[:num_faqs]
+        domain_query_embedding = chunker.embed([target_domain])[0]
+        selected_chunks = private_store.search(domain_query_embedding, top_k=min(num_faqs + 2, len(chunks)))
 
-        # 4. Smart Processing (Async)
-        logger.info(f"Step 4: Generating {len(questions)} answers in parallel...")
+        # 3. BATCH GENERATION (Strictly guided by domain)
+        task_manager.update(task_id, "processing", trace_entry={"agent": "SuperAgent", "action": f"Generating {target_domain} FAQ batch"})
+        batch_data = await super_agent.generate_batch(selected_chunks, num_faqs, target_domain)
         
-        async def process_one(q):
-            try:
-                # Sync embedding for search
-                query_emb = await asyncio.to_thread(chunker.model.encode, q)
-                contexts = store.search(query_emb, top_k=3) # Increased k for richer answers
-                context_text = "\n\n".join([c["text"] for c in contexts])
-                
-                # Single Pass Prompt (Comprehensive)
-                prompt = [
-                    {"role": "system", "content": "You are a professional technical writer. Answer the question using ONLY the provided context. Provide a comprehensive, clear answer (2-3 sentences). Use a professional tone."},
-                    {"role": "user", "content": f"DOCUMENT CONTEXT:\n{context_text}\n\nQUESTION: {q}\n\nDETAILED ANSWER:"}
-                ]
-                answer = await q_agent.llm.chat(prompt, temperature=0.2)
-                
-                return {
-                    "question": q,
-                    "answer": answer,
-                    "confidence": 0.95 if len(answer) > 50 else 0.7,
-                    "audit": {"is_supported": True, "reasoning": "Context-verified"},
-                    "sources": ["web" if source_data["type"] == "web" else "doc"]
-                }
-            except Exception as e:
-                logger.error(f"Failed FAQ: {e}")
-                return None
+        if not batch_data or "faqs" not in batch_data:
+            raise RuntimeError("Batch generation failed. The AI couldn't find relevant information for this domain.")
 
-        results = await asyncio.gather(*[process_one(q) for q in questions])
-        faqs = [r for r in results if r is not None]
+        # 4. ADAPTIVE REFINEMENT
+        final_faqs = []
+        for faq in batch_data["faqs"]:
+            faq["iterations"] = 1
+            faq["status"] = "verified"
+            
+            if faq.get("scores", {}).get("clarity", 1.0) < 0.7:
+                task_manager.update(task_id, "processing", trace_entry={"agent": "RefinerAgent", "action": "Polishing output"})
+                context = selected_chunks[0]["text"]
+                new_q, new_a = await refine_agent.refine(faq["question"], faq["answer"], context, f"Improve clarity for {target_domain} domain.")
+                faq["question"], faq["answer"] = new_q, new_a
+                faq["iterations"] = 2
+            
+            final_faqs.append(faq)
 
-        task_manager.update(task_id, "completed", faqs)
-        logger.info(f"Task {task_id} done in {len(faqs)} FAQs.")
+        # 5. FINALIZATION
+        task_manager.update(task_id, "completed", result=final_faqs, trace_entry={"agent": "Orchestrator", "action": "Workflow Completed"})
 
     except Exception as e:
         logger.error(f"Task {task_id} failed: {e}")
-        task_manager.update(task_id, "failed", {"error": str(e)})
+        task_manager.update(task_id, "failed", trace_entry={"agent": "Orchestrator", "action": f"CRITICAL ERROR: {str(e)}"})
 
-def start_task(task_id: str, source_data: dict, num_faqs: int):
-    thread = Thread(target=run_faq_task, args=(task_id, source_data, num_faqs))
+def run_faq_task(task_id: str, source_data: dict, num_faqs: int, target_domain: str = "auto"):
+    asyncio.run(_async_faq_task(task_id, source_data, num_faqs, target_domain))
+
+def start_task(task_id: str, source_data: dict, num_faqs: int, target_domain: str = "auto"):
+    thread = Thread(target=run_faq_task, args=(task_id, source_data, num_faqs, target_domain))
     thread.daemon = True
     thread.start()
