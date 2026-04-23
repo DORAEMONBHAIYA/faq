@@ -47,9 +47,9 @@
         .history-item:hover { background: var(--glass); color: white; }
         .history-item.active { background: rgba(99, 102, 241, 0.1); color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.2); }
         .history-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
-        .delete-icon { opacity: 0; transition: 0.2s; color: var(--text-dim); padding: 4px; border-radius: 4px; font-size: 0.8rem; }
+        .delete-icon { opacity: 0; transition: 0.2s; color: var(--text-dim); padding: 8px; border-radius: 6px; font-size: 0.9rem; margin-left: 5px; }
         .history-item:hover .delete-icon { opacity: 1; }
-        .delete-icon:hover { color: var(--error); background: rgba(239, 68, 68, 0.1); }
+        .delete-icon:hover { color: var(--error); background: rgba(239, 68, 68, 0.15); }
 
         .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
         .user-pill { display: flex; align-items: center; gap: 0.8rem; padding: 0.5rem; }
@@ -295,17 +295,27 @@
         }
 
         async function deleteHistoryItem(event, tid) {
+            event.preventDefault();
             event.stopPropagation();
+            
             if (!confirm("Permanently delete this generation?")) return;
             
-            const res = await fetch(`/task/${tid}`, { 
-                method: 'DELETE', 
-                headers: {'Authorization': `Bearer ${token}`} 
-            });
-            if (res.ok) {
-                loadHistory();
-                startNewTask();
-            } else alert("Failed to delete");
+            try {
+                const res = await fetch(`/task/${tid}`, { 
+                    method: 'DELETE', 
+                    headers: {'Authorization': `Bearer ${token}`} 
+                });
+                if (res.ok) {
+                    await loadHistory();
+                    startNewTask();
+                } else {
+                    const err = await res.json();
+                    alert("Error: " + (err.detail || "Failed to delete"));
+                }
+            } catch (e) {
+                console.error("Delete failed:", e);
+                alert("Connection error");
+            }
         }
 
         async function viewHistoryItem(el, tid) {

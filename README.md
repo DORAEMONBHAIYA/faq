@@ -1,144 +1,65 @@
-# 🚀 FAQ Generator using Multi-Agent AI
+# 🦅 AquilaFAQ | Intelligence System
 
-An intelligent system that automatically generates FAQs from user-provided content (documents, text, or transcripts) using a multi-agent architecture.
+AquilaFAQ is a state-of-the-art, **Multi-Agent AI FAQ Engine** designed to transform complex documents and websites into structured, expert-verified knowledge bases. Built for performance and precision, it utilizes Google's Gemini Pro models to orchestrate a sophisticated RAG (Retrieval-Augmented Generation) pipeline.
 
----
+![AquilaFAQ Dashboard](https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1600)
 
-## 📌 Overview
+## 🚀 Key Features
 
-This project is designed to solve the problem of extracting meaningful FAQs from large chunks of content like:
+- **Multi-Source Ingestion**: Seamlessly ingest content from PDFs and live Web URLs.
+- **Dynamic Perspective Detection**: Automatically identifies the "domain" of the content (e.g., Medical, Technical, Business) to tailor the FAQ style.
+- **Expert Multi-Agent Pipeline**: A fleet of specialized agents works in parallel to synthesize, validate, and refine every FAQ.
+- **Vector Intelligence**: Uses FAISS for high-speed semantic search across massive document sets.
+- **Premium UI**: A sleek, mobile-responsive dashboard with glassmorphism aesthetics and smooth transitions.
+- **Persistent History**: Integrated MongoDB Atlas storage for keeping your generations accessible across devices.
 
-* PDFs
-* Articles
-* Lecture transcripts
-* Videos (via transcripts)
+## 🧠 Multi-Agent Architecture
 
-Using a **multi-agent AI pipeline**, the system identifies key insights and converts them into concise, useful FAQ pairs.
+AquilaFAQ operates like an AI newsroom, where specialized agents collaborate to ensure accuracy:
 
----
-
-## ✨ Features
-
-* 🤖 Multi-Agent Architecture (planner, extractor, generator)
-* 📄 Accepts raw text / documents
-* ❓ Generates high-quality question-answer pairs
-* ⚡ Fast and automated FAQ creation
-* 🧠 Context-aware responses
-* 📊 Scalable for large datasets
-
----
-
-## 🧠 How It Works
-
-1. **Input Processing**
-
-   * User uploads or inputs text/document
-
-2. **Content Analysis Agent**
-
-   * Extracts key ideas and important segments
-
-3. **Question Generation Agent**
-
-   * Creates relevant questions
-
-4. **Answer Generation Agent**
-
-   * Generates accurate answers based on context
-
-5. **Output**
-
-   * Structured FAQ list
-
----
+1.  **Source Agent**: Ingests and cleanses data from Web/PDF.
+2.  **Domain Agent**: Analyzes the "vibe" and topic of the source to set the right tone.
+3.  **Chunking Agent**: Uses Gemini Embeddings to create a high-dimensional vector map of the text.
+4.  **Super Agent**: The "Lead Author" that synthesizes raw information into high-quality FAQs.
+5.  **Refinement Agent**: The "Editor-in-Chief" that checks for flow, accuracy, and formatting.
 
 ## 🛠️ Tech Stack
 
-* Python 🐍
-* LLM APIs (OpenAI / Claude / etc.)
-* NLP Techniques
-* Multi-Agent Workflow
+- **Backend**: FastAPI (Python)
+- **Database**: MongoDB Atlas (Persistent Storage) & FAISS (Vector Store)
+- **AI Engine**: Google Gemini Pro (LLM & Embeddings)
+- **Frontend**: Vanilla JS & CSS (Glassmorphism Design System)
+- **Authentication**: JWT (JSON Web Tokens) with secure password hashing.
 
----
+## ⚙️ Setup & Installation
 
-## 📂 Project Structure
+### 1. Prerequisites
+- Python 3.9+
+- MongoDB Atlas Account (or local MongoDB)
+- Google Gemini API Key
 
+### 2. Environment Configuration
+Create a `.env` file in the root directory:
+```env
+MONGODB_URI=mongodb+srv://your_connection_string
+GEMINI_API_KEY=your_gemini_key
+JWT_SECRET=your_secret_key_for_auth
 ```
-faq-generator/
-│── agents/              # Multi-agent logic  
-│── utils/               # Helper functions  
-│── data/                # Sample inputs  
-│── main.py              # Entry point  
-│── requirements.txt     # Dependencies  
-│── README.md  
-```
 
----
-
-## ⚙️ Installation
-
+### 3. Install Dependencies
 ```bash
-git clone https://github.com/your-username/faq-generator.git
-cd faq-generator
 pip install -r requirements.txt
 ```
 
----
-
-## ▶️ Usage
-
+### 4. Run Locally
 ```bash
-python main.py
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Or integrate with your frontend / API.
+## 📈 Deployment
+This project is optimized for **Render** and **Vercel**. 
+- The system is built to fit within a **512MB RAM** footprint by offloading heavy ML models to the Gemini Cloud API.
+- Ensure all environment variables are set in your production dashboard.
 
 ---
-
-## 📸 Example Output
-
-```
-Q: What is the purpose of this system?  
-A: It automatically generates FAQs from long-form content.  
-
-Q: How does it work?  
-A: It uses multiple AI agents to analyze, generate questions, and produce answers.  
-```
-
----
-
-## 🚧 Future Improvements
-
-* 🌐 Web UI integration
-* 📹 Direct video input processing
-* 📊 FAQ ranking & scoring
-* 🔍 Semantic search over generated FAQs
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome!
-
-1. Fork the repo
-2. Create a new branch
-3. Commit your changes
-4. Submit a PR
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License.
-
----
-
-## 👨‍💻 Author
-
-**Akshat Gupta**
-
----
-
-## ⭐ Support
-
-If you like this project, give it a ⭐ on GitHub!
+*Built with ❤️ by the Aquila Team.*
