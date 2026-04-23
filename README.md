@@ -1,65 +1,146 @@
-# 🦅 AquilaFAQ | Intelligence System
+# 📄 FAQ Generator using Multi-Agent AI System
 
-AquilaFAQ is a state-of-the-art, **Multi-Agent AI FAQ Engine** designed to transform complex documents and websites into structured, expert-verified knowledge bases. Built for performance and precision, it utilizes Google's Gemini Pro models to orchestrate a sophisticated RAG (Retrieval-Augmented Generation) pipeline.
+An intelligent **FAQ generation system** that automatically extracts meaningful, domain-relevant questions and answers from large documents using **multi-agent architecture, embeddings, and domain filtering techniques**.
 
-![AquilaFAQ Dashboard](https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1600)
+---
 
-## 🚀 Key Features
+## 🚀 Overview
 
-- **Multi-Source Ingestion**: Seamlessly ingest content from PDFs and live Web URLs.
-- **Dynamic Perspective Detection**: Automatically identifies the "domain" of the content (e.g., Medical, Technical, Business) to tailor the FAQ style.
-- **Expert Multi-Agent Pipeline**: A fleet of specialized agents works in parallel to synthesize, validate, and refine every FAQ.
-- **Vector Intelligence**: Uses FAISS for high-speed semantic search across massive document sets.
-- **Premium UI**: A sleek, mobile-responsive dashboard with glassmorphism aesthetics and smooth transitions.
-- **Persistent History**: Integrated MongoDB Atlas storage for keeping your generations accessible across devices.
+This project is designed to solve the problem of extracting **useful and relevant FAQs** from large unstructured documents (e.g., PDFs, notes, research papers, transcripts).
 
-## 🧠 Multi-Agent Architecture
+Instead of blindly generating FAQs, the system:
+- Identifies **domain-relevant content**
+- Filters out low-value information
+- Generates **high-quality, context-aware FAQs**
 
-AquilaFAQ operates like an AI newsroom, where specialized agents collaborate to ensure accuracy:
+---
 
-1.  **Source Agent**: Ingests and cleanses data from Web/PDF.
-2.  **Domain Agent**: Analyzes the "vibe" and topic of the source to set the right tone.
-3.  **Chunking Agent**: Uses Gemini Embeddings to create a high-dimensional vector map of the text.
-4.  **Super Agent**: The "Lead Author" that synthesizes raw information into high-quality FAQs.
-5.  **Refinement Agent**: The "Editor-in-Chief" that checks for flow, accuracy, and formatting.
+## 🧠 Key Features
 
-## 🛠️ Tech Stack
+- 🔹 Multi-Agent Architecture for modular processing  
+- 🔹 Domain Relevance Filtering (prevents useless FAQ generation)  
+- 🔹 Embedding-based semantic understanding  
+- 🔹 Handles large documents (~10k+ tokens)  
+- 🔹 Intelligent FAQ extraction (not just summarization)  
+- 🔹 Scalable pipeline for research and production use  
 
-- **Backend**: FastAPI (Python)
-- **Database**: MongoDB Atlas (Persistent Storage) & FAISS (Vector Store)
-- **AI Engine**: Google Gemini Pro (LLM & Embeddings)
-- **Frontend**: Vanilla JS & CSS (Glassmorphism Design System)
-- **Authentication**: JWT (JSON Web Tokens) with secure password hashing.
+---
 
-## ⚙️ Setup & Installation
+## ⚙️ How It Works
 
-### 1. Prerequisites
-- Python 3.9+
-- MongoDB Atlas Account (or local MongoDB)
-- Google Gemini API Key
+### 1. Document Parsing
+- Input document (PDF / text) is parsed into smaller chunks
 
-### 2. Environment Configuration
-Create a `.env` file in the root directory:
-```env
-MONGODB_URI=mongodb+srv://your_connection_string
-GEMINI_API_KEY=your_gemini_key
-JWT_SECRET=your_secret_key_for_auth
+### 2. Embedding Generation
+- Each chunk is converted into vector embeddings
+
+### 3. Domain Relevance Detection
+- A scoring system evaluates whether the chunk belongs to the **target domain**
+- Low-domain chunks are discarded
+
+### 4. Multi-Agent Processing
+Different agents handle different responsibilities:
+- **Extractor Agent** → Finds potential FAQ-worthy content  
+- **Validator Agent** → Checks relevance and clarity  
+- **Generator Agent** → Converts content into Q&A format  
+
+### 5. FAQ Generation
+- High-quality FAQs are generated only from validated domain-specific content
+
+---
+
+## 🏗️ Project Structure
+
+```
+faq/
+│── data/                 # Input documents
+│── agents/               # Multi-agent modules
+│── embeddings/           # Embedding logic
+│── utils/                # Helper functions
+│── main.py               # Main execution pipeline
+│── config.py             # Configuration settings
+│── requirements.txt
+│── README.md
 ```
 
-### 3. Install Dependencies
+---
+
+## 📦 Installation
+
 ```bash
+git clone https://github.com/DORAEMONBHAIYA/faq.git
+cd faq
+
 pip install -r requirements.txt
 ```
 
-### 4. Run Locally
+---
+
+## ▶️ Usage
+
 ```bash
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+python main.py
 ```
 
-## 📈 Deployment
-This project is optimized for **Render** and **Vercel**. 
-- The system is built to fit within a **512MB RAM** footprint by offloading heavy ML models to the Gemini Cloud API.
-- Ensure all environment variables are set in your production dashboard.
+Optional configuration:
+- Set domain threshold
+- Adjust chunk size
+- Choose embedding model
 
 ---
-*Built with ❤️ by the Aquila Team.*
+
+## 🧪 Example Use Case
+
+Input:
+> A 10,000-token technical document
+
+Output:
+- Clean, structured FAQs
+- Only domain-relevant Q&A pairs
+- No noise or irrelevant questions
+
+---
+
+## 📊 Research Value
+
+This project is useful for:
+- 📚 Academic research papers  
+- 🤖 NLP experimentation  
+- 🧾 Documentation automation  
+- 🏢 Enterprise knowledge systems  
+
+It also allows comparison between:
+- Embedding-only vs Hybrid systems  
+- Domain-filtered vs raw FAQ generation  
+- Multi-agent vs single-model pipelines  
+
+---
+
+## 🔮 Future Improvements
+
+- Add RAG (Retrieval-Augmented Generation)
+- Fine-tuned domain classifiers
+- UI for document upload & FAQ visualization
+- Real-time FAQ generation API
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+```bash
+fork → clone → create branch → commit → PR
+```
+
+---
+
+## 📜 License
+
+This project is open-source and available under the MIT License.
+
+---
+
+## 👨‍💻 Author
+
+Developed by **AKSHAT GUPTA**
