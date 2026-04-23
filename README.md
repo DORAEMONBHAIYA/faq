@@ -53,14 +53,56 @@ Different agents handle different responsibilities:
 
 ```
 faq/
-│── data/                 # Input documents
-│── agents/               # Multi-agent modules
-│── embeddings/           # Embedding logic
-│── utils/                # Helper functions
-│── main.py               # Main execution pipeline
-│── config.py             # Configuration settings
-│── requirements.txt
-│── README.md
+├── .gitignore
+├── README.md
+├── requirements.txt
+│
+├── app/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── main.py
+│   │
+│   ├── agents/
+│   │   ├── answer_agent.py
+│   │   ├── audit_agent.py
+│   │   ├── chunking_agent.py
+│   │   ├── document_agent.py
+│   │   ├── domain_agent.py
+│   │   ├── generator_agent.py
+│   │   ├── question_agent.py
+│   │   ├── refinement_agent.py
+│   │   ├── refiner_agent.py
+│   │   ├── source_manager.py
+│   │   ├── super_agent.py
+│   │   ├── validation_agent.py
+│   │   ├── validator_agent.py
+│   │   └── web_agent.py
+│   │
+│   ├── api/
+│   │   └── routes.py
+│   │
+│   ├── auth/
+│   │   └── auth_handler.py
+│   │
+│   ├── database/
+│   │   └── mongodb.py
+│   │
+│   ├── llm/
+│   │   └── llm_client.py
+│   │
+│   ├── utils/
+│   │   ├── background_worker.py
+│   │   ├── task_manager.py
+│   │   └── text_cleaner.py
+│   │
+│   └── vectorstore/
+│       └── faiss_store.py
+│
+├── static/
+│   └── index.html
+│
+└── scratch/
+    └── test_gemini.py
 ```
 
 ---
