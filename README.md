@@ -121,7 +121,7 @@ pip install -r requirements.txt
 ## ▶️ Usage
 
 ```bash
-python main.py
+python -m uvicorn app.main:app --port 8000
 ```
 
 Optional configuration:
@@ -174,12 +174,6 @@ Contributions are welcome!
 ```bash
 fork → clone → create branch → commit → PR
 ```
-
----
-
-## 📜 License
-
-This project is open-source and available under the MIT License.
 
 ---
 
