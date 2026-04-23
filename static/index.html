@@ -308,12 +308,25 @@
             } else alert("Failed to delete");
         }
 
-        function viewHistoryItem(el, tid) {
+        async function viewHistoryItem(el, tid) {
             document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            switchView(3);
-            pollTask(tid);
-            toggleMobileSidebar(); // Close sidebar on mobile after selection
+            
+            // Check status immediately before showing loader
+            const headers = token ? {'Authorization': `Bearer ${token}`} : {};
+            const res = await fetch(`/results/${tid}`, { headers });
+            const data = await res.json();
+            
+            if (data.status === 'completed') {
+                renderResults(data);
+            } else if (data.status === 'failed') {
+                alert("This generation failed. Check source or API limits.");
+                startNewTask();
+            } else {
+                switchView(3);
+                pollTask(tid);
+            }
+            toggleMobileSidebar();
         }
 
         async function signup() {

@@ -1,7 +1,10 @@
 import httpx
 import uuid
 import asyncio
+import logging
 from app.config import GEMINI_API_KEY, CHUNK_SIZE
+
+logger = logging.getLogger("ChunkingAgent")
 
 class ChunkingAgent:
     def __init__(self):
@@ -20,27 +23,35 @@ class ChunkingAgent:
                 })
         return chunks
 
+    async def _get_single_embedding(self, client, text):
+        """Internal helper for parallel embedding calls."""
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={self.api_key}"
+        payload = {
+            "model": "models/gemini-embedding-001",
+            "content": {"parts": [{"text": text}]}
+        }
+        res = await client.post(url, json=payload)
+        if res.status_code != 200:
+            logger.error(f"Gemini API Error ({res.status_code}): {res.text}")
+            res.raise_for_status()
+        return res.json()["embedding"]["values"]
+
     async def embed(self, inputs: list):
-        """Uses Gemini Embedding API to save RAM."""
+        """Uses Gemini API with parallel requests for reliability and speed."""
         if not inputs:
             return []
         
         texts = [c["text"] if isinstance(c, dict) else c for c in inputs]
         
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/embedding-001:batchEmbedContents?key={self.api_key}"
-        
-        # Batching for Gemini (Max 100 per call)
-        all_embeddings = []
-        for i in range(0, len(texts), 100):
-            batch = texts[i:i+100]
-            payload = {
-                "requests": [{"model": "models/embedding-001", "content": {"parts": [{"text": t}]}} for t in batch]
-            }
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            # Run all embedding requests in parallel (capped at 50 to avoid rate limits)
+            semaphore = asyncio.Semaphore(50)
             
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                res = await client.post(url, json=payload)
-                res.raise_for_status()
-                data = res.json()
-                all_embeddings.extend([e["values"] for e in data["embeddings"]])
+            async def throttled_embed(text):
+                async with semaphore:
+                    return await self._get_single_embedding(client, text)
+            
+            tasks = [throttled_embed(t) for t in texts]
+            all_embeddings = await asyncio.gather(*tasks)
                 
         return all_embeddings

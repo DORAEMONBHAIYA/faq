@@ -72,9 +72,13 @@ async def _async_faq_task(task_id: str, source_data: dict, num_faqs: int, target
         task_manager.update(task_id, "completed", result=final_faqs, trace_entry={"agent": "Orchestrator", "action": "Workflow Completed"})
 
     except Exception as e:
-        error_msg = str(e)
-        logger.error(f"Task {task_id} failed: {error_msg}")
-        task_manager.update(task_id, "failed", trace_entry={"agent": "Orchestrator", "action": f"ERROR: {error_msg}"})
+        import traceback
+        error_type = type(e).__name__
+        error_msg = str(e) or "Unknown error"
+        full_error = f"{error_type}: {error_msg}"
+        logger.error(f"Task {task_id} failed: {full_error}")
+        logger.error(traceback.format_exc())
+        task_manager.update(task_id, "failed", trace_entry={"agent": "Orchestrator", "action": f"ERROR: {full_error}"})
 
 def run_faq_task(task_id: str, source_data: dict, num_faqs: int, target_domain: str = "auto"):
     asyncio.run(_async_faq_task(task_id, source_data, num_faqs, target_domain))
