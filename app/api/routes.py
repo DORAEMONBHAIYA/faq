@@ -146,12 +146,11 @@ async def get_history(user_id: str = Depends(get_current_user)):
 
 @router.delete("/task/{task_id}")
 async def delete_task(task_id: str, user_id: str = Depends(get_current_user)):
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
+    # 🛡️ SECURITY: task_manager.delete_task handles the user_id check.
+    # If user_id is None, it only deletes anonymous tasks.
     success = task_manager.delete_task(task_id, user_id)
     if not success:
-        raise HTTPException(status_code=404, detail="Task not found or not owned by user")
+        raise HTTPException(status_code=404, detail="Task not found or permission denied")
     return {"message": "Task deleted successfully"}
 
 @router.get("/results/{task_id}")

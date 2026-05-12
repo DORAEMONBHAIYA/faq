@@ -1,1 +1,12 @@
-/.env
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.vscode/
+.idea/
+*.db
+*.log
+faiss_index/
+tmp/
+scratch/

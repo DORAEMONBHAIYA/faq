@@ -30,14 +30,17 @@ async def _async_faq_task(task_id: str, source_data: dict, num_faqs: int, target
         if not chunks:
             raise ValueError("No content found in source. Please check the URL or File.")
             
-        # 🧪 NEW: Generate Catchy AI Title
-        task_manager.update(task_id, "processing", trace_entry={"agent": "DomainAgent", "action": "Naming your session"})
-        ai_title = await domain_agent.generate_title(chunks[0]["text"])
+        # 🧪 NEW: Parallelize Title generation and Embedding for speed
+        task_manager.update(task_id, "processing", trace_entry={"agent": "Orchestrator", "action": "Analyzing Content & Indexing"})
+        
+        title_task = domain_agent.generate_title(chunks[0]["text"])
+        embed_task = chunker.embed(chunks)
+        
+        ai_title, embeddings = await asyncio.gather(title_task, embed_task)
+
         task_manager.update(task_id, "processing", domain={"source_name": ai_title})
-        # Note: We update the source_name in the DB record
         task_manager.collection.update_one({"task_id": task_id}, {"$set": {"source_name": ai_title}})
 
-        embeddings = await chunker.embed(chunks)
         private_store.add(embeddings, chunks)
         
         # 2. DOMAIN-AWARE RETRIEVAL (Semantic Search in private store)
@@ -53,23 +56,9 @@ async def _async_faq_task(task_id: str, source_data: dict, num_faqs: int, target
         if not batch_data or "faqs" not in batch_data:
             raise RuntimeError("Batch generation failed. The AI couldn't find relevant information for this domain.")
 
-        # 4. ADAPTIVE REFINEMENT
-        final_faqs = []
-        for faq in batch_data["faqs"]:
-            faq["iterations"] = 1
-            faq["status"] = "verified"
-            
-            if faq.get("scores", {}).get("clarity", 1.0) < 0.7:
-                task_manager.update(task_id, "processing", trace_entry={"agent": "RefinerAgent", "action": "Polishing output"})
-                context = selected_chunks[0]["text"]
-                new_q, new_a = await refine_agent.refine(faq["question"], faq["answer"], context, f"Improve clarity for {target_domain} domain.")
-                faq["question"], faq["answer"] = new_q, new_a
-                faq["iterations"] = 2
-            
-            final_faqs.append(faq)
-
-        # 5. FINALIZATION
-        task_manager.update(task_id, "completed", result=final_faqs, trace_entry={"agent": "Orchestrator", "action": "Workflow Completed"})
+        # 4. FINALIZATION
+        # Note: We skip refinement to minimize API calls as requested.
+        task_manager.update(task_id, "completed", result=batch_data["faqs"], trace_entry={"agent": "Orchestrator", "action": "Workflow Completed"})
 
     except Exception as e:
         import traceback

@@ -59,8 +59,18 @@ class TaskManager:
 
     def delete_task(self, task_id, user_id):
         """Permanently delete a task and its associated data."""
-        # Ensure the task belongs to the user requesting deletion
-        res = self.collection.delete_one({"task_id": task_id, "user_id": user_id})
+        if not task_id:
+            return False
+            
+        # 🛡️ SECURITY: If user is logged in, they can only delete their own tasks.
+        # If user is NOT logged in, they can only delete anonymous tasks.
+        query = {"task_id": task_id}
+        if user_id:
+            query["user_id"] = user_id
+        else:
+            query["user_id"] = {"$in": [None, ""]}
+            
+        res = self.collection.delete_one(query)
         return res.deleted_count > 0
 
     def get_user_tasks(self, user_id: str):

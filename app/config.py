@@ -13,7 +13,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta"
 
 # Model Names
-GEMINI_MODEL = "gemma-3-27b-it"
+GEMINI_MODEL = "gemini-3.1-flash-lite"
 
 # Generation Settings
 MAX_NUM_FAQS = 20

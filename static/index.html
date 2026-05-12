@@ -298,23 +298,28 @@
             event.preventDefault();
             event.stopPropagation();
             
-            if (!confirm("Permanently delete this generation?")) return;
-            
             try {
+                const h = token ? {'Authorization': `Bearer ${token}`} : {};
                 const res = await fetch(`/task/${tid}`, { 
                     method: 'DELETE', 
-                    headers: {'Authorization': `Bearer ${token}`} 
+                    headers: h 
                 });
+                
                 if (res.ok) {
                     await loadHistory();
-                    startNewTask();
+                    // If we're currently viewing this task, switch back to home
+                    const resultsArea = document.getElementById('results-view');
+                    if (resultsArea && !resultsArea.classList.contains('hidden')) {
+                        // Check if the current task ID is the one deleted
+                        // We'll just reset for simplicity or if it matches
+                        startNewTask();
+                    }
                 } else {
                     const err = await res.json();
-                    alert("Error: " + (err.detail || "Failed to delete"));
+                    console.error("Delete failed:", err);
                 }
             } catch (e) {
-                console.error("Delete failed:", e);
-                alert("Connection error");
+                console.error("Connection error during delete:", e);
             }
         }
 

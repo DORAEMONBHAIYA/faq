@@ -25,14 +25,15 @@ class ChunkingAgent:
 
     async def _get_single_embedding(self, client, text):
         """Internal helper for parallel embedding calls."""
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={self.api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key={self.api_key}"
         payload = {
-            "model": "models/gemini-embedding-001",
-            "content": {"parts": [{"text": text}]}
+            "model": "models/gemini-embedding-2",
+            "content": {"parts": [{"text": str(text)}]},
+            "taskType": "RETRIEVAL_DOCUMENT"
         }
         res = await client.post(url, json=payload)
         if res.status_code != 200:
-            logger.error(f"Gemini API Error ({res.status_code}): {res.text}")
+            logger.error(f"Embedding API Error ({res.status_code}): {res.text}")
             res.raise_for_status()
         return res.json()["embedding"]["values"]
 
