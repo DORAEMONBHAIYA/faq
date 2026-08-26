@@ -13,7 +13,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# 🛡️ SECURITY: Production Headers Middleware
 @app.middleware("http")
 async def add_security_headers(request, call_next):
     response = await call_next(request)
@@ -24,7 +23,6 @@ async def add_security_headers(request, call_next):
     response.headers["Content-Security-Policy"] = "default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:;"
     return response
 
-# Mount static files
 os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -36,4 +34,5 @@ def serve_ui():
 
 @app.get("/health")
 def health():
-    return {"status": "AquilaFAQ running"}
+    from app.config import LLM_PROVIDER, ACTIVE_MODEL
+    return {"status": "Aquila Learn running", "provider": LLM_PROVIDER, "model": ACTIVE_MODEL}

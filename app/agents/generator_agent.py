@@ -9,12 +9,12 @@ class GeneratorAgent:
         """Generate a grounded FAQ with explainability."""
         prompt = [
             {
-                "role": "system", 
+                "role": "system",
                 "content": f"You are a Knowledge Extraction Agent specializing in the {domain_info.get('domain', 'General')} domain. "
                            "Create a high-value FAQ from the text. Be concise. Return ONLY JSON."
             },
             {
-                "role": "user", 
+                "role": "user",
                 "content": f"TEXT:\n{chunk_text}\n\n"
                            "INSTRUCTIONS:\n"
                            "1. Question must be clear.\n"
@@ -25,7 +25,7 @@ class GeneratorAgent:
                            "{\"question\": \"...\", \"answer\": \"...\", \"why_generated\": \"...\", \"source_reference\": \"...\"}"
             }
         ]
-        
+
         try:
             res_raw = await self.llm.chat_json(prompt)
             data = json.loads(res_raw)

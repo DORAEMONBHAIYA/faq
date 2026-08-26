@@ -24,24 +24,23 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
 
-        /* Sidebar Styling */
-        .sidebar { 
-            width: var(--sidebar-width); background: var(--sidebar-bg); border-right: 1px solid var(--border); 
+        .sidebar {
+            width: var(--sidebar-width); background: var(--sidebar-bg); border-right: 1px solid var(--border);
             display: flex; flex-direction: column; padding: 1.5rem; transition: transform 0.3s ease;
             z-index: 1001;
         }
-        
-        .new-task-btn { 
-            width: 100%; padding: 1rem; background: var(--glass); border: 1px solid var(--border); 
-            border-radius: 12px; color: white; font-weight: 600; cursor: pointer; 
+
+        .new-task-btn {
+            width: 100%; padding: 1rem; background: var(--glass); border: 1px solid var(--border);
+            border-radius: 12px; color: white; font-weight: 600; cursor: pointer;
             margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: 0.3s;
         }
         .new-task-btn:hover { background: var(--primary); border-color: var(--primary); transform: translateY(-2px); }
 
         .history-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); margin-bottom: 1rem; padding-left: 0.5rem; }
         .history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; }
-        .history-item { 
-            padding: 0.8rem 1rem; border-radius: 10px; cursor: pointer; transition: 0.2s; 
+        .history-item {
+            padding: 0.8rem 1rem; border-radius: 10px; cursor: pointer; transition: 0.2s;
             font-size: 0.9rem; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center;
         }
         .history-item:hover { background: var(--glass); color: white; }
@@ -55,17 +54,15 @@
         .user-pill { display: flex; align-items: center; gap: 0.8rem; padding: 0.5rem; }
         .user-icon { width: 32px; height: 32px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
 
-        /* Main Content Styling */
         .main-content { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0b0f1a 100%); width: 100%; }
         .navbar { padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: rgba(11, 15, 26, 0.5); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; }
-        
+
         .mobile-menu-btn { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0.5rem; }
 
         .content-area { max-width: 800px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; }
-        
+
         .card { background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; margin-bottom: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 100%; }
 
-        /* Inputs */
         .drop-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 3rem 1.5rem; text-align: center; cursor: pointer; background: var(--glass); transition: 0.3s; }
         .drop-zone:hover { border-color: var(--primary); background: rgba(255,255,255,0.05); }
         .modal-input { width: 100%; padding: 1rem; background: var(--glass); border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 1.5rem; outline: none; font-size: 1rem; }
@@ -74,41 +71,65 @@
         .btn { padding: 1rem 2rem; background: var(--primary); border: none; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
         .btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
-        /* Results */
         .faq-item { background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 3px solid var(--primary); }
         .faq-question { font-size: 1.1rem; font-weight: 600; color: #a5b4fc; margin-bottom: 1rem; }
         .faq-answer { font-size: 0.95rem; line-height: 1.7; color: #cbd5e1; }
 
-        /* Utils */
         .hidden { display: none !important; }
         .loader { width: 32px; height: 32px; border: 3px solid var(--glass); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        
+
         .topic-chip { padding: 0.6rem 1.2rem; background: var(--glass); border: 1px solid var(--border); border-radius: 100px; cursor: pointer; transition: 0.2s; font-size: 0.85rem; color: var(--text-dim); }
         .topic-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .mode-chip { padding: 0.7rem 1.4rem; background: var(--glass); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; color: var(--text-dim); font-weight: 600; display:flex; align-items:center; gap:0.5rem; }
+        .mode-chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 15px rgba(99,102,241,0.3); }
+        .lang-select { width: 100%; padding: 0.8rem 1rem; background: var(--glass); border: 1px solid var(--border); border-radius: 12px; color: white; outline:none; font-size:0.9rem; margin-bottom:1rem; }
+        .lang-select option { background: #111827; }
 
-        /* Auth Modals */
+        .flashcard { background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom:1rem; cursor:pointer; transition:0.3s; min-height:120px; display:flex; flex-direction:column; justify-content:center; }
+        .flashcard:hover { border-color: var(--primary); }
+        .flashcard .front { font-weight:600; color:#a5b4fc; font-size:1.05rem; }
+        .flashcard .back { color:#cbd5e1; margin-top:1rem; display:none; border-top:1px solid var(--border); padding-top:1rem; }
+        .flashcard.flipped .back { display:block; }
+        .translate-btn { padding:0.5rem 1rem; background: rgba(99,102,241,0.15); border:1px solid rgba(99,102,241,0.3); color:#a5b4fc; border-radius:100px; font-size:0.8rem; font-weight:600; cursor:pointer; transition:0.2s; display:none; }
+        .translate-btn.show { display:inline-flex; align-items:center; gap:0.4rem; }
+        .translate-btn:hover { background: var(--primary); color:white; }
+
+        .quiz-item { background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom:1.2rem; }
+        .quiz-q { font-weight:600; color:#f8fafc; margin-bottom:1rem; }
+        .quiz-opt { padding:0.7rem 1rem; background: rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; margin-bottom:0.5rem; cursor:pointer; transition:0.2s; }
+        .quiz-opt:hover { background: rgba(99,102,241,0.1); }
+        .quiz-opt.selected { border-color: var(--primary); background: rgba(99,102,241,0.15); }
+        .quiz-opt.correct { border-color: var(--accent); background: rgba(16,185,129,0.15); }
+        .quiz-opt.wrong { border-color: var(--error); background: rgba(239,68,68,0.15); }
+        .quiz-expl { margin-top:0.8rem; font-size:0.85rem; color:#94a3b8; display:none; }
+        .quiz-expl.show { display:block; }
+
+        .chat-switcher { display:flex; gap:0.5rem; margin-bottom:1.2rem; background: var(--glass); padding:0.4rem; border-radius:14px; border:1px solid var(--border); }
+        .chat-switcher button { flex:1; padding:0.7rem; border-radius:10px; border:1px solid transparent; background:transparent; color:var(--text-dim); font-weight:600; cursor:pointer; transition:0.2s; font-size:0.85rem; }
+        .chat-switcher button.active { background:var(--primary); color:white; border-color:var(--primary); }
+        .chat-switcher button:hover:not(.active) { background: rgba(255,255,255,0.05); color:white; }
+
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; padding: 1rem; }
         .modal-content { background: var(--sidebar-bg); border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
 
-        /* Mobile Responsive Adjustments */
         @media (max-width: 768px) {
-            .sidebar { 
-                position: fixed; left: 0; top: 0; height: 100%; 
-                transform: translateX(-100%); 
+            .sidebar {
+                position: fixed; left: 0; top: 0; height: 100%;
+                transform: translateX(-100%);
             }
             .sidebar.open { transform: translateX(0); }
-            
+
             .mobile-menu-btn { display: block; }
             .navbar { justify-content: space-between; }
-            
+
             .content-area { padding: 1.5rem 1rem; }
             .card { padding: 1.5rem; border-radius: 20px; }
             h1 { font-size: 2rem !important; }
-            
-            .sidebar-overlay { 
-                display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                background: rgba(0,0,0,0.6); z-index: 1000; 
+
+            .sidebar-overlay {
+                display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.6); z-index: 1000;
             }
             .sidebar-overlay.show { display: block; }
         }
@@ -117,12 +138,11 @@
 <body>
     <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
-    <!-- Sidebar -->
     <aside id="sidebar" class="sidebar">
         <button class="new-task-btn" onclick="startNewTask(); toggleMobileSidebar();">
-            <span>+</span> New FAQ Task
+            <span>+</span> New Learning Task
         </button>
-        
+
         <div class="history-label">Past Generations</div>
         <div id="history-list" class="history-list">
             <div style="text-align: center; color: var(--text-dim); font-size: 0.8rem; margin-top: 2rem;">
@@ -147,48 +167,77 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
         <nav class="navbar">
             <button class="mobile-menu-btn" onclick="toggleMobileSidebar()">☰</button>
-            <div style="font-size: 0.7rem; color: var(--text-dim); letter-spacing: 2px; font-weight: 700;">AQUILA v3.5</div>
+            <div style="font-size: 0.7rem; color: var(--text-dim); letter-spacing: 2px; font-weight: 700;">AQUILA LEARN v4.0</div>
         </nav>
 
         <div class="content-area">
-            <!-- Step 1: Ingest -->
+
             <div id="step-1" class="view">
                 <div style="text-align: center; margin-bottom: 2rem;">
-                    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Intelligent Analysis</h1>
-                    <p style="color: var(--text-dim); font-size: 0.9rem;">Upload PDF or paste URL to begin.</p>
+                    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Smart Learning Hub</h1>
+                    <p style="color: var(--text-dim); font-size: 0.9rem;">Upload Docs, Images or paste URL — then choose your study mode.</p>
                 </div>
                 <div class="card">
                     <div class="drop-zone" onclick="document.getElementById('file-input').click()">
-                        <p style="color: var(--text-dim); font-size: 0.9rem;">Drop PDF or Click to Browse</p>
+                        <p style="color: var(--text-dim); font-size: 0.9rem;">Drop PDF / DOCX / PPTX / TXT / Image or Click to Browse</p>
+                        <p style="color: var(--text-dim); font-size: 0.7rem; margin-top:0.5rem;">Supports: PDF, TXT, DOCX, PPTX, JPG/PNG/WEBP (10MB max)</p>
                         <div id="file-details" style="margin-top: 1rem; color: var(--accent); font-weight: 600; font-size: 0.8rem; display: none;"></div>
-                        <input type="file" id="file-input" accept=".pdf" onchange="handleFileSelect()">
+                        <input type="file" id="file-input" accept=".pdf,.txt,.docx,.pptx,.jpg,.jpeg,.png,.webp" onchange="handleFileSelect()">
                     </div>
                     <div style="margin: 1.5rem 0; text-align: center; color: var(--text-dim); font-size: 0.8rem;">OR</div>
                     <input type="url" id="url-input" placeholder="Enter website URL..." class="modal-input">
                     <div style="text-align: center;">
-                        <button class="btn" style="width: 100%;" onclick="handleIngest()">Analyze Source</button>
+                        <button id="analyze-btn" class="btn" style="width: 100%;" onclick="handleIngest()">Analyze Source</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 2: Topics -->
             <div id="step-2" class="view hidden">
                 <div class="card" style="text-align: center;">
-                    <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Select Perspective</h2>
-                    <div id="topic-container" style="display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center; margin-bottom: 2rem;"></div>
-                    <div style="max-width: 100%; margin: 0 auto;">
-                        <label style="display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.5rem;">Quantity: <span id="faq-count-val" style="color: var(--primary); font-weight: 700;">5</span></label>
+                    <h2 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Customize Your Study</h2>
+                    <p id="detected-lang-info" style="color: var(--accent); font-size:0.8rem; margin-bottom:1.5rem;"></p>
+
+                    <div style="text-align:left; margin-bottom:1.5rem;">
+                        <label style="font-size:0.8rem; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase;">1. Study Mode</label>
+                        <div style="display:flex; gap:0.7rem; margin-top:0.8rem; justify-content:center; flex-wrap:wrap;">
+                            <div class="mode-chip active" data-mode="faq" onclick="selectMode(this,'faq')">📄 FAQ</div>
+                            <div class="mode-chip" data-mode="flashcards" onclick="selectMode(this,'flashcards')">🃏 Flashcards</div>
+                            <div class="mode-chip" data-mode="quiz" onclick="selectMode(this,'quiz')">📝 Quiz</div>
+                        </div>
+                    </div>
+
+                    <div style="text-align:left; margin-bottom:1.5rem;">
+                        <label style="font-size:0.8rem; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase;">2. Language</label>
+                        <select id="language-select" class="lang-select" style="margin-top:0.8rem;">
+                            <option value="auto">Auto (Detected)</option>
+                            <option value="en">English</option>
+                            <option value="hi">Hindi — हिन्दी</option>
+                            <option value="ta">Tamil — தமிழ்</option>
+                            <option value="ml">Malayalam — മലയാളം</option>
+                            <option value="gu">Gujarati — ગુજરાતી</option>
+                            <option value="mr">Marathi — मराठी</option>
+                            <option value="bn">Bengali — বাংলা</option>
+                            <option value="te">Telugu — తెలుగు</option>
+                            <option value="kn">Kannada — ಕನ್ನಡ</option>
+                        </select>
+                    </div>
+
+                    <div style="text-align:left; margin-bottom:1rem;">
+                        <label style="font-size:0.8rem; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase;">3. Topic Perspective</label>
+                        <div id="topic-container" style="display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center; margin-top:0.8rem; margin-bottom: 1rem;"></div>
+                    </div>
+
+                    <div style="max-width: 100%; margin: 0 auto; text-align:left;">
+                        <label style="display: block; font-size: 0.8rem; color: var(--text-dim); letter-spacing:1px; text-transform:uppercase; margin-bottom: 0.8rem;">4. Quantity: <span id="faq-count-val" style="color: var(--primary); font-weight: 700;">5</span> <span id="qty-label" style="color:var(--text-dim); font-weight:400;">items</span></label>
                         <input type="range" id="faq-count" min="3" max="15" value="5" style="width: 100%; accent-color: var(--primary);" oninput="document.getElementById('faq-count-val').innerText = this.value">
-                        <button class="btn" style="width: 100%; margin-top: 2rem;" onclick="startGeneration()">Start Generation</button>
+                        <button class="btn" style="width: 100%; margin-top: 2rem;" onclick="startGeneration()">Start Generation →</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 3: Processing -->
             <div id="step-3" class="view hidden">
                 <div class="card" style="text-align: center; padding: 5rem 1.5rem;">
                     <div class="loader"></div>
@@ -197,18 +246,27 @@
                 </div>
             </div>
 
-            <!-- Step 4: Results -->
             <div id="step-4" class="view hidden">
-                <div id="results-header" style="margin-bottom: 1.5rem;">
-                    <h2 id="results-title" style="font-size: 1.6rem; margin-bottom: 0.3rem;">Generated FAQs</h2>
-                    <p id="results-meta" style="color: var(--text-dim); font-size: 0.8rem;"></p>
+                <div id="results-header" style="margin-bottom: 1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:start; gap:1rem; flex-wrap:wrap;">
+                        <div>
+                            <h2 id="results-title" style="font-size: 1.6rem; margin-bottom: 0.3rem;">Generated FAQs</h2>
+                            <p id="results-meta" style="color: var(--text-dim); font-size: 0.8rem; margin-bottom:0.3rem;"></p>
+                        </div>
+                        <button id="translate-btn" class="translate-btn" onclick="toggleTranslate()">🌐 Translate to English</button>
+                    </div>
+                    <div class="chat-switcher" id="chat-switcher" style="margin-top:1rem;">
+                        <button data-mode="faq" onclick="switchChatMode('faq')" class="active">📄 FAQ</button>
+                        <button data-mode="flashcards" onclick="switchChatMode('flashcards')">🃏 Flashcards</button>
+                        <button data-mode="quiz" onclick="switchChatMode('quiz')">📝 Quiz</button>
+                    </div>
+                    <div id="switcher-status" style="font-size:0.75rem; color:var(--text-dim); min-height:1rem; margin-top:0.5rem;"></div>
                 </div>
                 <div id="faq-container"></div>
             </div>
         </div>
     </main>
 
-    <!-- Modals -->
     <div id="login-modal" class="modal">
         <div class="modal-content">
             <h2 style="margin-bottom: 1.5rem;">Welcome Back</h2>
@@ -236,6 +294,13 @@
         let token = localStorage.getItem('token');
         let currentSourceId = "";
         let selectedTopic = "General";
+        let selectedMode = "faq";
+        let selectedLanguage = "auto";
+        let detectedLanguage = "auto";
+        let currentTaskId = "";
+        let pollTimer = null;
+        let chatCache = {}; // { sourceId: { faq: task, flashcards: task, quiz: task } }
+        let currentModeView = "faq";
 
         function toggleMobileSidebar() {
             if (window.innerWidth <= 768) {
@@ -246,12 +311,31 @@
             }
         }
 
+        function selectMode(el, mode){
+            document.querySelectorAll('.mode-chip').forEach(c=>c.classList.remove('active'));
+            el.classList.add('active'); selectedMode = mode;
+            const qtyLabel = document.getElementById('qty-label');
+            const slider = document.getElementById('faq-count');
+            if(mode==='flashcards'){ slider.max=15; slider.min=5; if(slider.value<5) slider.value=8; qtyLabel.innerText='cards'; }
+            else if(mode==='quiz'){ slider.max=15; slider.min=3; qtyLabel.innerText='questions'; }
+            else { slider.max=15; slider.min=3; qtyLabel.innerText='FAQs'; }
+            document.getElementById('faq-count-val').innerText = slider.value;
+        }
         function startNewTask() {
+            if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
             currentSourceId = "";
-            selectedTopic = "General";
+            currentTaskId = "";
+            selectedTopic = "General"; selectedMode="faq"; selectedLanguage="auto"; detectedLanguage="auto"; currentModeView="faq";
             document.getElementById('file-input').value = "";
             document.getElementById('url-input').value = "";
-            document.getElementById('file-details').style.display = 'none';
+            const fd = document.getElementById('file-details'); if (fd){ fd.style.display='none'; fd.innerText=''; }
+            const langSel = document.getElementById('language-select'); if (langSel) langSel.value = "auto";
+            const langInfo = document.getElementById('detected-lang-info'); if (langInfo) langInfo.innerText='';
+            document.querySelectorAll('.mode-chip').forEach(c=>c.classList.remove('active'));
+            document.querySelector('[data-mode=\"faq\"]')?.classList.add('active');
+            const ab = document.getElementById('analyze-btn'); if (ab){ ab.innerText='Analyze Source'; ab.disabled=false; }
+            const slider = document.getElementById('faq-count'); if (slider){ slider.value=5; document.getElementById('faq-count-val').innerText='5'; document.getElementById('qty-label').innerText='items'; }
+            const sw = document.getElementById('switcher-status'); if (sw) sw.innerText='';
             switchView(1);
             document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
         }
@@ -279,39 +363,80 @@
         checkAuth();
 
         async function loadHistory() {
-            const res = await fetch('/user/history', { headers: {'Authorization': `Bearer ${token}`} });
+            const h = token ? {'Authorization': `Bearer ${token}`} : {};
+            const res = await fetch('/user/history', { headers: h });
             const tasks = await res.json();
             const list = document.getElementById('history-list');
             if (tasks.length === 0) {
                 list.innerHTML = '<div style="text-align: center; color: var(--text-dim); font-size: 0.8rem; margin-top: 2rem;">No history yet</div>';
                 return;
             }
-            list.innerHTML = tasks.map(t => `
-                <div class="history-item" onclick="viewHistoryItem(this, '${t.task_id}')">
-                    <span class="history-text">${t.source_name || 'Generating...'}</span>
-                    <span class="delete-icon" onclick="deleteHistoryItem(event, '${t.task_id}')">✕</span>
-                </div>
-            `).join('');
+            const bySource = {};
+            for (const t of tasks){
+                const key = t.source_id || t.source_name || t.task_id;
+                if (!bySource[key]){
+                    bySource[key] = { source_name: t.source_name || 'Document', source_id: t.source_id || '', tasks: [], latest: t };
+                }
+                bySource[key].tasks.push(t);
+            }
+            const groups = Object.values(bySource);
+            groups.sort((a,b)=> new Date(b.latest.created_at) - new Date(a.latest.created_at));
+            const modeIcon = {faq:'📄', flashcards:'🃏', quiz:'📝'};
+            list.innerHTML = groups.map(g => {
+                const latest = g.latest;
+                const count = g.tasks.length;
+                const modes = [...new Set(g.tasks.map(x=>x.mode))].map(m=>modeIcon[m]||m).join(' ');
+                const displayId = latest.task_id;
+                const sid = g.source_id || '';
+                const tids = g.tasks.map(x=>x.task_id).join(',');
+                return `
+                <div class="history-item" data-source-id="${sid}" onclick="viewHistorySource(this, '${displayId}', '${sid}')">
+                    <span class="history-text">${latest.source_name || 'Document'} <span style="font-size:0.7rem; color:var(--text-dim);">${modes} ${count>1? '• '+count+' modes':''}</span></span>
+                    <span class="delete-icon" data-tids="${tids}" onclick="deleteHistorySource(event, '${sid}', this.dataset.tids)">✕</span>
+                </div>`;
+            }).join('');
+            for (const g of groups){
+                if (g.source_id){
+                    if (!chatCache[g.source_id]) chatCache[g.source_id]= {};
+                    for (const t of g.tasks){
+                        if (t.status==='completed' && t.mode){
+                            chatCache[g.source_id][t.mode] = t;
+                        }
+                    }
+                }
+            }
+        }
+        async function deleteHistorySource(event, sourceId, taskIds){
+            event.preventDefault(); event.stopPropagation();
+            let tids = [];
+            if (typeof taskIds === 'string') tids = taskIds.split(',').filter(Boolean);
+            else if (Array.isArray(taskIds)) tids = taskIds;
+            if (!tids || tids.length===0) return;
+            if (!confirm(`Delete this chat and all its ${tids.length} generations?`)) return;
+            const h = token ? {'Authorization': `Bearer ${token}`} : {};
+            for (const tid of tids){
+                try{ await fetch(`/task/${tid}`, { method:'DELETE', headers: h }); } catch{}
+            }
+            if (sourceId && chatCache[sourceId]) delete chatCache[sourceId];
+            await loadHistory();
+            if (currentSourceId===sourceId) startNewTask();
         }
 
         async function deleteHistoryItem(event, tid) {
             event.preventDefault();
             event.stopPropagation();
-            
+
             try {
                 const h = token ? {'Authorization': `Bearer ${token}`} : {};
-                const res = await fetch(`/task/${tid}`, { 
-                    method: 'DELETE', 
-                    headers: h 
+                const res = await fetch(`/task/${tid}`, {
+                    method: 'DELETE',
+                    headers: h
                 });
-                
+
                 if (res.ok) {
                     await loadHistory();
-                    // If we're currently viewing this task, switch back to home
                     const resultsArea = document.getElementById('results-view');
                     if (resultsArea && !resultsArea.classList.contains('hidden')) {
-                        // Check if the current task ID is the one deleted
-                        // We'll just reset for simplicity or if it matches
                         startNewTask();
                     }
                 } else {
@@ -323,26 +448,29 @@
             }
         }
 
-        async function viewHistoryItem(el, tid) {
+        async function viewHistorySource(el, tid, sourceId) {
             document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            
-            // Check status immediately before showing loader
+            if (sourceId) currentSourceId = sourceId;
             const headers = token ? {'Authorization': `Bearer ${token}`} : {};
             const res = await fetch(`/results/${tid}`, { headers });
             const data = await res.json();
-            
+            if (sourceId) currentSourceId = data.source_id || sourceId;
+            if (data.source_id && !chatCache[data.source_id]) chatCache[data.source_id]={};
             if (data.status === 'completed') {
+                if (data.source_id) chatCache[data.source_id][data.mode]=data;
                 renderResults(data);
             } else if (data.status === 'failed') {
                 alert("This generation failed. Check source or API limits.");
                 startNewTask();
             } else {
+                currentTaskId = tid;
                 switchView(3);
                 pollTask(tid);
             }
             toggleMobileSidebar();
         }
+        async function viewHistoryItem(el, tid){ return viewHistorySource(el, tid, ''); }
 
         async function signup() {
             const btn = event.target;
@@ -354,7 +482,7 @@
                 confirm_password: document.getElementById('signup-confirm').value
             };
             if (payload.password !== payload.confirm_password) return alert("Passwords mismatch");
-            
+
             btn.innerText = "Joining..."; btn.disabled = true;
             const res = await fetch('/auth/signup', {
                 method: 'POST',
@@ -371,7 +499,7 @@
             const original = btn.innerText;
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            
+
             btn.innerText = "Checking..."; btn.disabled = true;
             const res = await fetch('/auth/login', {
                 method: 'POST',
@@ -402,32 +530,41 @@
         }
 
         async function handleIngest() {
+            const btn = document.getElementById('analyze-btn');
             try {
                 const file = document.getElementById('file-input').files[0];
-                const url = document.getElementById('url-input').value;
+                const url = document.getElementById('url-input').value.trim();
                 const headers = token ? {'Authorization': `Bearer ${token}`} : {};
-                
-                const btn = event.target; btn.innerText = "Analyzing..."; btn.disabled = true;
+
+                if (btn){ btn.innerText = "Analyzing..."; btn.disabled = true; }
 
                 let res;
                 if (file) {
                     const formData = new FormData(); formData.append('file', file);
                     res = await fetch('/ingest/document', { method: 'POST', body: formData, headers });
                 } else if (url) {
-                    res = await fetch('/ingest/web', { 
-                        method: 'POST', 
-                        headers: {...headers, 'Content-Type': 'application/json'}, 
-                        body: JSON.stringify({ url }) 
+                    res = await fetch('/ingest/web', {
+                        method: 'POST',
+                        headers: {...headers, 'Content-Type': 'application/json'},
+                        body: JSON.stringify({ url })
                     });
                 } else throw new Error("Please provide a source");
 
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || "Failed");
-                
+                const text = await res.text();
+                let data; try{ data = JSON.parse(text);} catch{ throw new Error(text || "Failed");}
+                if (!res.ok) throw new Error(data.detail || data.message || "Failed");
+
                 currentSourceId = data.source_id;
+                currentTaskId = "";
+                if (!chatCache[currentSourceId]) chatCache[currentSourceId] = {};
+                detectedLanguage = data.detected_language || 'auto';
+                document.getElementById('language-select').value = 'auto';
+                const langInfo = document.getElementById('detected-lang-info');
+                if(data.language_name && data.detected_language!=='auto') langInfo.innerText = `Detected: ${data.language_name} (${data.detected_language}) — change if needed`;
+                else langInfo.innerText = '';
                 renderTopics(data.topics);
                 switchView(2);
-            } catch (err) { alert(err.message); } finally { event.target.innerText = "Analyze Source"; event.target.disabled = false; }
+            } catch (err) { alert(err.message); } finally { if (btn){ btn.innerText = "Analyze Source"; btn.disabled = false; } }
         }
 
         function renderTopics(topics) {
@@ -444,39 +581,48 @@
         }
 
         async function startGeneration() {
+            if (!currentSourceId){ alert('No source — please ingest first'); switchView(1); return; }
             switchView(3);
             const count = document.getElementById('faq-count').value;
+            selectedLanguage = document.getElementById('language-select').value || 'auto';
             const headers = token ? {'Authorization': `Bearer ${token}`} : {};
-            const res = await fetch(`/generate/faq?source_id=${currentSourceId}&num_faqs=${count}&target_domain=${selectedTopic}`, { method: 'POST', headers });
+            const res = await fetch(`/generate/learn?source_id=${currentSourceId}&mode=${selectedMode}&num_items=${count}&target_domain=${selectedTopic}&language=${selectedLanguage}`, { method: 'POST', headers });
             const data = await res.json();
-            
-            // 🔄 Show in history immediately
+            if(!res.ok){ alert(data.detail||'Generation failed'); switchView(2); return; }
+            currentTaskId = data.task_id;
+            if (!chatCache[currentSourceId]) chatCache[currentSourceId]={};
             loadHistory();
-            
             pollTask(data.task_id);
         }
 
         async function pollTask(taskId) {
-            const timer = setInterval(async () => {
+            if (pollTimer) clearInterval(pollTimer);
+            currentTaskId = taskId;
+            pollTimer = setInterval(async () => {
                 const headers = token ? {'Authorization': `Bearer ${token}`} : {};
                 const res = await fetch(`/results/${taskId}`, { headers });
                 const data = await res.json();
-                
                 if (res.status === 403) {
-                    clearInterval(timer);
+                    clearInterval(pollTimer); pollTimer=null;
                     alert("Session expired. Please login again.");
-                    logout();
-                    return;
+                    logout(); return;
                 }
-
-                if (data.status === 'completed') { 
-                    clearInterval(timer); 
-                    renderResults(data); 
+                if (data.source_id) currentSourceId = data.source_id;
+                if (data.status === 'completed') {
+                    clearInterval(pollTimer); pollTimer=null;
+                    if (data.source_id){
+                        if (!chatCache[data.source_id]) chatCache[data.source_id]={};
+                        chatCache[data.source_id][data.mode]=data;
+                    }
+                    renderResults(data);
                 }
-                else if (data.status === 'failed') { 
-                    clearInterval(timer); 
-                    alert("Generation failed."); 
-                    startNewTask(); 
+                else if (data.status === 'failed') {
+                    clearInterval(pollTimer); pollTimer=null;
+                    const msg = data.agent_trace?.slice(-1)[0]?.action || 'Generation failed';
+                    alert(msg);
+                    switchView(4);
+                    document.getElementById('switcher-status').innerText = 'Failed: '+msg;
+                    loadHistory();
                 }
                 else if (data.agent_trace?.length > 0) {
                     const latest = data.agent_trace[data.agent_trace.length-1];
@@ -485,17 +631,152 @@
             }, 2000);
         }
 
+        let quizState = {};
+        let originalTaskData = null;
+        let translatedCache = {}; // task_id -> translated result
+        let isTranslated = false;
+
+        async function toggleTranslate(){
+            const btn = document.getElementById('translate-btn');
+            if (!originalTaskData) return;
+            if (isTranslated){
+                isTranslated = false;
+                btn.innerText = '🌐 Translate to English';
+                btn.disabled = false;
+                renderResultsInner(originalTaskData, false);
+                return;
+            }
+            const taskId = originalTaskData.task_id;
+            if (translatedCache[taskId]){
+                isTranslated = true;
+                btn.innerText = '↩ Show Original';
+                const translated = {...originalTaskData, result: translatedCache[taskId], language: 'en (translated)'};
+                renderResultsInner(translated, true);
+                return;
+            }
+            btn.innerText = 'Translating...'; btn.disabled = true;
+            try{
+                const headers = token ? {'Authorization': `Bearer ${token}`, 'Content-Type':'application/json'} : {'Content-Type':'application/json'};
+                const res = await fetch(`/translate/${taskId}`, { method:'POST', headers, body: JSON.stringify({target_language:'en'}) });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Translation failed');
+                translatedCache[taskId] = data.translated;
+                isTranslated = true;
+                btn.innerText = '↩ Show Original'; btn.disabled = false;
+                const translated = {...originalTaskData, result: data.translated, language: 'en (translated)'};
+                renderResultsInner(translated, true);
+            } catch(e){
+                alert(e.message);
+                btn.innerText = '🌐 Translate to English'; btn.disabled = false;
+            }
+        }
+        function renderResultsInner(data, isTrans){
+            const mode = data.mode || 'faq';
+            const container = document.getElementById('faq-container');
+            if(mode==='flashcards'){
+                container.innerHTML = `<div style="margin-bottom:1rem; color:var(--text-dim); font-size:0.85rem;">Tap a card to flip • ${data.result.length} cards ${isTrans?'• Translated':''}</div>` + data.result.map((c,i)=>`
+                    <div class="flashcard" onclick="this.classList.toggle('flipped')">
+                        <div class="front">Q${i+1}: ${c.front}</div>
+                        <div class="back">${c.back}</div>
+                    </div>
+                `).join('');
+            } else if(mode==='quiz'){
+                quizState[data.task_id] = {};
+                container.innerHTML = `<div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;"><span style="color:var(--text-dim); font-size:0.85rem;">${data.result.length} questions • Click option to answer ${isTrans?'• Translated':''}</span><button class="btn" style="padding:0.5rem 1rem; font-size:0.8rem;" onclick="scoreQuiz('${data.task_id}')">Show Score</button></div><div id="quiz-score" style="margin-bottom:1rem; font-weight:700; color:var(--accent);"></div>` + data.result.map((q,i)=>`
+                    <div class="quiz-item" data-idx="${i}">
+                        <div class="quiz-q">Q${i+1}: ${q.question}</div>
+                        ${q.options.map((opt,oi)=>`<div class="quiz-opt" onclick="selectQuizOpt(this, '${data.task_id}', ${i}, ${oi}, ${q.correct_index})">${String.fromCharCode(65+oi)}. ${opt}</div>`).join('')}
+                        <div class="quiz-expl" id="expl-${i}"><strong>Explanation:</strong> ${q.explanation||''}</div>
+                    </div>
+                `).join('');
+                container.dataset.quiz = JSON.stringify(data.result);
+            } else {
+                container.innerHTML = data.result.map(f => `
+                    <div class="faq-item">
+                        <div class="faq-question">${f.question}</div>
+                        <div class="faq-answer">${f.answer} ${isTrans?'<span style=\"font-size:0.7rem; color:var(--text-dim)\"> (Translated)</span>':''}</div>
+                    </div>
+                `).join('');
+            }
+        }
         function renderResults(data) {
+            if (pollTimer){ clearInterval(pollTimer); pollTimer=null; }
             switchView(4);
-            document.getElementById('results-title').innerText = data.source_name || "Generated FAQs";
-            document.getElementById('results-meta').innerText = `Category: ${data.domain?.domain || selectedTopic} • ${new Date(data.created_at).toLocaleDateString()}`;
-            document.getElementById('faq-container').innerHTML = data.result.map(f => `
-                <div class="faq-item">
-                    <div class="faq-question">${f.question}</div>
-                    <div class="faq-answer">${f.answer}</div>
-                </div>
-            `).join('');
+            const mode = data.mode || 'faq';
+            currentModeView = mode;
+            currentTaskId = data.task_id;
+            originalTaskData = data;
+            isTranslated = false;
+            if (data.source_id){ currentSourceId = data.source_id; if (!chatCache[currentSourceId]) chatCache[currentSourceId]={}; chatCache[currentSourceId][mode]=data; }
+            selectedTopic = data.domain?.domain || selectedTopic;
+            document.querySelectorAll('#chat-switcher button').forEach(b=>{ b.classList.toggle('active', b.dataset.mode===mode); });
+            const langDisp = data.language || 'auto';
+            document.getElementById('results-title').innerText = `${mode==='flashcards'?'Flashcards':mode==='quiz'?'Mock Quiz':'Generated FAQs'} — ${data.source_name || ''}`;
+            document.getElementById('results-meta').innerText = `Mode: ${mode} • ${langDisp} • Category: ${data.domain?.domain || selectedTopic} • ${new Date(data.created_at).toLocaleDateString()}`;
+            document.getElementById('switcher-status').innerText = '';
+            const tbtn = document.getElementById('translate-btn');
+            const needsTranslate = langDisp && langDisp !== 'en' && !langDisp.includes('translated') && langDisp !== 'auto' && langDisp !== 'en (translated)';
+            if (needsTranslate){
+                tbtn.classList.add('show');
+                tbtn.innerText = '🌐 Translate to English';
+                tbtn.disabled = false;
+            } else {
+                tbtn.classList.remove('show');
+            }
+            renderResultsInner(data, false);
             loadHistory();
+        }
+        async function switchChatMode(mode){
+            if (!currentSourceId){ alert('No source loaded'); return; }
+            if (mode===currentModeView){
+                return;
+            }
+            document.querySelectorAll('#chat-switcher button').forEach(b=>{
+                b.classList.toggle('active', b.dataset.mode===mode);
+            });
+            document.getElementById('switcher-status').innerText = `Switching to ${mode}...`;
+            const cached = chatCache[currentSourceId]?.[mode];
+            if (cached && cached.status==='completed'){
+                currentModeView = mode;
+                renderResults(cached);
+                document.getElementById('switcher-status').innerText = '';
+                return;
+            }
+            const headers = token ? {'Authorization': `Bearer ${token}`} : {};
+            const countMap = {faq:5, flashcards:8, quiz:5};
+            const count = countMap[mode] || 5;
+            const lang = selectedLanguage || 'auto';
+            try{
+                const res = await fetch(`/generate/learn?source_id=${currentSourceId}&mode=${mode}&num_items=${count}&target_domain=${selectedTopic}&language=${lang}`, { method:'POST', headers });
+                const data = await res.json();
+                if(!res.ok) throw new Error(data.detail||'Failed to generate');
+                switchView(3);
+                document.getElementById('status-text').innerText = `Switching to ${mode}...`;
+                currentModeView = mode;
+                pollTask(data.task_id);
+            } catch(e){
+                alert(e.message);
+                document.getElementById('switcher-status').innerText = 'Switch failed: '+e.message;
+                document.querySelectorAll('#chat-switcher button').forEach(b=>b.classList.toggle('active', b.dataset.mode===currentModeView));
+            }
+        }
+        function selectQuizOpt(el, taskId, qIdx, optIdx, correct){
+            const parent = el.parentElement;
+            parent.querySelectorAll('.quiz-opt').forEach(o=>{o.classList.remove('selected','correct','wrong')});
+            el.classList.add('selected');
+            const isCorrect = optIdx===correct;
+            el.classList.add(isCorrect?'correct':'wrong');
+            parent.querySelectorAll('.quiz-opt')[correct].classList.add('correct');
+            document.getElementById('expl-'+qIdx).classList.add('show');
+            quizState[taskId][qIdx] = isCorrect?1:0;
+        }
+        function scoreQuiz(taskId){
+            const total = Object.keys(quizState[taskId]||{}).length;
+            const correct = Object.values(quizState[taskId]||{}).reduce((a,b)=>a+b,0);
+            const container = document.getElementById('faq-container');
+            const quiz = JSON.parse(container.dataset.quiz||'[]');
+            const scoreText = `Score: ${correct} / ${quiz.length}`;
+            document.getElementById('quiz-score').innerText = scoreText + (correct===quiz.length?' 🎉 Perfect!':' Keep practicing!');
         }
 
         function switchView(s) {

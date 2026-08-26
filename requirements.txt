@@ -15,3 +15,9 @@ faiss-cpu
 numpy
 pdfplumber
 dnspython
+# Smart Learning System additions
+python-docx
+python-pptx
+Pillow
+langdetect
+openai

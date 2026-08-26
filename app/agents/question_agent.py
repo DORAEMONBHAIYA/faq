@@ -25,7 +25,7 @@ class QuestionAgent:
         return unique
 
     def generate(self, text: str, n=5):
-        # Keep this for backward compatibility or bulk generation
+
         messages = [
             {"role": "system", "content": "Generate distinct, non-overlapping FAQ questions from the text."},
             {"role": "user", "content": f"Text:\n{text}\n\nGenerate {n} unique FAQs. Ensure no two questions cover the same topic."}

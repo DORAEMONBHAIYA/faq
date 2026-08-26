@@ -10,3 +10,4 @@ venv/
 faiss_index/
 tmp/
 scratch/
+TASK.md

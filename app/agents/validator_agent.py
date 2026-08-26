@@ -9,12 +9,12 @@ class ValidatorAgent:
         """Perform multi-dimensional scoring and hallucination detection."""
         prompt = [
             {
-                "role": "system", 
+                "role": "system",
                 "content": f"You are a Senior Quality Assurance Agent for AI systems. Your domain is {domain_info.get('domain', 'General')}. "
                            "Score the FAQ based on the provided context. Return ONLY a JSON object."
             },
             {
-                "role": "user", 
+                "role": "user",
                 "content": f"CONTEXT:\n{context}\n\nFAQ:\nQ: {question}\nA: {answer}\n\n"
                            "Evaluate based on these criteria (0.0 to 1.0):\n"
                            "1. relevance: Does it address a key concept?\n"
@@ -25,7 +25,7 @@ class ValidatorAgent:
                            "{\"relevance\": 0.0, \"faithfulness\": 0.0, \"clarity\": 0.0, \"difficulty\": 0.0, \"hallucination_detected\": bool, \"critique\": \"...\"}"
             }
         ]
-        
+
         try:
             res_raw = await self.llm.chat_json(prompt)
             data = json.loads(res_raw)

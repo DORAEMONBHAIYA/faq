@@ -11,13 +11,13 @@ class AuditAgent:
         Returns a confidence score and reasoning.
         """
         context_text = "\n\n".join([c["text"] for c in contexts])
-        
+
         system_prompt = (
             "You are an AI Auditor. Your job is to verify if an answer is strictly "
             "supported by the provided context. You must also check if the answer "
             "directly addresses the question."
         )
-        
+
         user_prompt = (
             f"Context:\n{context_text}\n\n"
             f"Question: {question}\n"
@@ -28,12 +28,12 @@ class AuditAgent:
             "- 'confidence_score': float (0.0 to 1.0)\n"
             "- 'reasoning': string"
         )
-        
+
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ]
-        
+
         try:
             raw_json = self.llm.chat_json(messages)
             return json.loads(raw_json)

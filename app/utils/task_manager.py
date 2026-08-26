@@ -6,10 +6,9 @@ class TaskManager:
     def __init__(self):
         self.collection = db.tasks
 
-    def create_task(self, user_id: str = None, source_name: str = "Unknown Source"):
+    def create_task(self, user_id: str = None, source_name: str = "Unknown Source", mode: str = "faq", language: str = "auto", source_id: str = None):
         task_id = f"task_{uuid.uuid4().hex[:8]}"
-        
-        # Retention Policy
+
         retention_days = 7 if user_id else 0
         retention_hours = 0 if user_id else 1
         expires_at = datetime.utcnow() + timedelta(days=retention_days, hours=retention_hours)
@@ -17,8 +16,11 @@ class TaskManager:
         task = {
             "task_id": task_id,
             "user_id": user_id,
+            "source_id": source_id,
             "source_name": source_name,
             "status": "queued",
+            "mode": mode,
+            "language": language,
             "result": [],
             "domain": {},
             "agent_trace": [],
@@ -30,12 +32,12 @@ class TaskManager:
 
     def update(self, task_id, status, result=None, domain=None, trace_entry=None):
         update_doc = {"status": status, "updated_at": datetime.utcnow()}
-        
+
         if result is not None:
             update_doc["result"] = result
         if domain is not None:
             update_doc["domain"] = domain
-            
+
         push_doc = {}
         if trace_entry:
             push_doc["agent_trace"] = {
@@ -61,15 +63,13 @@ class TaskManager:
         """Permanently delete a task and its associated data."""
         if not task_id:
             return False
-            
-        # 🛡️ SECURITY: If user is logged in, they can only delete their own tasks.
-        # If user is NOT logged in, they can only delete anonymous tasks.
+
         query = {"task_id": task_id}
         if user_id:
             query["user_id"] = user_id
         else:
             query["user_id"] = {"$in": [None, ""]}
-            
+
         res = self.collection.delete_one(query)
         return res.deleted_count > 0
 

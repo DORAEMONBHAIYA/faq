@@ -1,98 +1,122 @@
-# 🏛️ AquilaFAQ System Architecture
+# 🏛️ Aquila Learn System Architecture
 
-This document explains the internal logic and data flow of the AquilaFAQ system. The core of the system is a **Multi-Agent Orchestrator** that manages the transition from raw data to verified knowledge.
+> **AquilaFAQ → Smart Student Learning System (v4.0)** — single-chat, multilingual, multi-modal.
 
 ## 🔄 High-Level Data Flow
 
 ```mermaid
 graph TD
-    User((User)) -->|Upload PDF / URL| Ingest[Source Ingestion]
-    Ingest -->|Raw Text| Domain[Domain Agent]
-    Domain -->|Context & Topic| Orchestrator{Agent Orchestrator}
-    
+    User((Student)) -->|PDF/DOCX/PPTX/TXT/Image/URL<br/>+ Mode/Language| Ingest[Source Ingestion]
+    Ingest -->|Raw Blocks| Lang[Language Agent<br/>heuristic + langdetect]
+    Lang -->|lang code| Domain[Domain Agent<br/>embedding similarity]
+    Domain -->|topic + lang| Orchestrator{Orchestrator<br/>BackgroundWorker}
+
     subgraph "RAG Intelligence Layer"
-    Orchestrator -->|Split Text| Chunk[Chunking Agent]
-    Chunk -->|Vectors| Embed[Gemini Embeddings]
-    Embed -->|Index| FAISS[(FAISS Vector Store)]
+    Orchestrator -->|Split 250w| Chunk[Chunking Agent]
+    Chunk -->|Vectors| Embed{Gemini / OX Embeddings<br/>gemini-embedding-001}
+    Embed -->|Index| FAISS[(FAISS IndexFlatL2<br/>per-task ephemeral)]
     end
-    
-    subgraph "Expert Generation Phase"
-    FAISS -->|Relevant Context| Super[Super Agent]
-    Super -->|Draft FAQs| Refiner[Refinement Agent]
-    Refiner -->|Polished Result| Validator[Validation Agent]
+
+    subgraph "Language-Aware Retrieval"
+    FAISS -->|Semantic search<br/>domain query embedding| Context[Relevant Chunks]
     end
-    
-    Validator -->|Final JSON| DB[(MongoDB Atlas)]
-    DB -->|Real-time Poll| Dashboard[User Dashboard]
+
+    subgraph "Expert Generation (mode switch)"
+    Context -->|FAQ| Super[SuperAgent]
+    Context -->|Flashcards| Flash[FlashcardAgent<br/>no hint]
+    Context -->|MCQ| Quiz[QuizAgent]
+    Super -->|clean_answer_text| Out[JSON Result]
+    Flash -->|clean_answer_text| Out
+    Quiz -->|clean_answer_text| Out
+    Out -->|optional| Trans[TranslatorAgent<br/>to English]
+    end
+
+    Out --> DB[(MongoDB Atlas<br/>sources + tasks<br/>TTL 7d/1h)]
+    Trans --> DB
+    DB -->|poll /results| Chat[Single-Chat Dashboard<br/>switcher + translate toggle]
+    DB -->|group by source_id| History[History Sidebar<br/>one chat per source]
 ```
 
-## 🛠️ The 5-Phase Generation Process
+## 🛠️ The 6-Phase Learning Pipeline
 
-### Phase 1: Ingestion & Domain Mapping
-When a source is provided, the **SourceManagerAgent** orchestrates the initial extraction. It delegates to the **DocumentAgent** (for PDFs) or the **WebAgent** (for URLs). Simultaneously, the **DomainAgent** analyzes the content to detect its "Expertise Domain" (e.g., Medical, Technical, Legal).
+### Phase 1: Multi-Modal Ingestion & Language
+`SourceManagerAgent` delegates to `DocumentAgent` (pdfplumber), `FileAgent` (docx/pptx/txt), `ImageAgent` (Pillow + Vision OCR via OpenRouter/Gemini), `WebAgent` (requests+bs4, SSRF guard). `LanguageAgent` detects script (`\u0900` Devanagari → hi, `\u0B80` Tamil → ta, etc.) + `langdetect` → `language` field persisted.
 
-## 🤖 Deep Dive: The Agent Workforce
+### Phase 2: Vectorization (Memory)
+`ChunkingAgent.chunk()` → 250-word overlapping blocks → `embed()` batches 100 (OX if `OX_EMBED_MODEL` else Gemini, 50-concurrency) → `FAISSStore.add()` auto-init dim. Per-task `FAISSStore` avoids cross-user leakage.
 
-AquilaFAQ is powered by a team of specialized AI agents. Each agent has a specific "job description" and criteria for success.
+### Phase 3: Domain & Retrieval
+`DomainAgent.detect_topics()` embeds `sample_text[:3000]` and cosine-sim against pre-embedded categories (Technical/Medical/... General, threshold 0.35). `DomainAgent.generate_title()` (LLM) in parallel with embeddings. Retrieval: embed `target_domain` and `FAISS.search(top_k = num_items+2)`.
 
-### 1. Source & Extraction Agents
-- **SourceManagerAgent**: The lead coordinator for data entry. It manages the retention policy (TTL) and ensures the data is saved securely in MongoDB before processing begins.
-- **DocumentAgent**: A precision extractor for PDFs. It handles page-by-page parsing and cleans up OCR noise.
-- **WebAgent**: A specialized scraper that filters out "junk" (ads, nav bars, footers) to find the core content of any website.
+### Phase 4: Expert Synthesis (Mode-Aware)
+`BackgroundWorker._async_learn_task(task_id, source_data, num_items, target_domain, target_language, mode)`:
+- `mode=faq` → `SuperAgent.generate_batch(chunks, n, domain, lang)` — student-friendly, forbids `Chunk` refs, `clean_answer_text` post-process
+- `mode=flashcards` → `FlashcardAgent.generate(...)` — `{front,back,difficulty,source_reference}` no hint
+- `mode=quiz` → `QuizAgent.generate(...)` — `{question, options[4], correct_index, explanation, difficulty}`
+All prompts enforce `Language: {lang_name}` and `CRITICAL: JSON only`.
 
-### 2. The Intelligence Layer
-- **DomainAgent**: The "Strategist." It identifies the target audience and tone. If the document is about "Diabetes," it sets the domain to *Medical* so the FAQs aren't too casual.
-- **ChunkingAgent**: The "Librarian." It uses the **Gemini Embedding API** to transform raw text into a searchable vector map. It ensures no information is lost by using overlapping chunks.
+### Phase 5: Translation (On-Demand)
+`TranslatorAgent.translate_task(task, target="en")` builds mode-specific JSON payload and calls `LLMClient.chat_json` to translate `question/answer` or `front/back` or `question/options/explanation` while keeping `correct_index`.
 
-### 3. The Generation Squad
-- **SuperAgent**: The "Expert Author." Armed with the most relevant text chunks, it writes the first draft of the FAQs. It is instructed to be accurate, helpful, and concise.
-- **RefinementAgent**: The "Editor-in-Chief." It reviews the SuperAgent's work. It fixes awkward phrasing, ensures professional formatting, and removes repetitive content.
-- **ValidatorAgent**: The "Quality Inspector." Its sole job is to ensure the output is perfect JSON and that all questions have corresponding, fact-checked answers.
-
-## 📊 Agent Workflow Chart
+### Phase 6: State & Single-Chat
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant SMA as SourceManagerAgent
-    participant DA as DomainAgent
+    participant U as Student
+    participant SMA as SourceManager
+    participant LA as LanguageAgent
     participant CA as ChunkingAgent
-    participant SA as SuperAgent
-    participant RA as RefinementAgent
+    participant SA as Super/Flash/Quiz
+    participant TA as TranslatorAgent
+    participant DB as MongoDB
+    participant UI as Chat UI
 
-    U->>SMA: Provides Source (URL/PDF)
-    SMA->>SMA: Extract & Store Text
-    SMA->>DA: Send Raw Text
-    DA-->>SMA: Return Domain (e.g. Technical)
-    SMA->>CA: Send Text + Domain
-    CA->>CA: Create Embeddings & FAISS Index
-    CA->>SA: Provide Relevant Context
-    SA->>SA: Generate FAQ Drafts
-    SA->>RA: Send Drafts for Review
-    RA->>RA: Polish, Format & Validate
-    RA-->>U: Deliver Final Knowledge Base
+    U->>SMA: Upload / URL + pick mode+lang
+    SMA->>SMA: Extract & store + detect lang
+    SMA->>CA: chunks
+    CA->>CA: embed + FAISS
+    CA->>SA: relevant chunks
+    SA-->>DB: task completed (mode, language, result, source_id)
+    U->>UI: poll /results
+    UI->>UI: cache chatCache[sourceId][mode]
+    U->>UI: Switch mode (same sourceId)
+    UI->>SA: if not cached, generate new mode
+    U->>TA: Translate toggle
+    TA-->>UI: English JSON
 ```
 
-### Phase 2: Vectorization (The "Memory" Phase)
-The **Chunking Agent** breaks the long text into overlapping blocks. Each block is sent to the **Gemini Embedding API**, which converts human language into a 768-dimensional mathematical vector. These vectors are stored in a local **FAISS Index** for instant semantic retrieval.
+- **Task Manager**: `create_task(user_id, source_name, mode, language, source_id)`, `update(status, result, trace)`, TTL indexes (`expires_at`), `mode`/`language`/`source_id` indexes; `get_user_tasks` sorted desc.
+- **MongoDB**: `sources` and `tasks` collections, 7-day (auth) / 1-hour (anon) TTL, user+source indexes.
+- **Background Worker**: `Thread` + `asyncio.run(_async_learn_task)` to keep API responsive; `RateLimiter` 60 rpm.
 
-### Phase 3: Context Retrieval
-Instead of feeding the entire document to the AI (which is expensive and slow), the system performs a **Semantic Search**. It looks for parts of the document that are most relevant to the "Domain" and "Core Topics" identified in Phase 1.
+## 🤖 Agent Workforce (v4.0)
 
-### Phase 4: Expert Synthesis (Super Agent)
-The **Super Agent** takes the retrieved context and acts as a subject matter expert. It doesn't just "summarize"; it synthesizes new Questions and Answers that are factually grounded in the source text.
+### 1. Source & Extraction
+- **SourceManagerAgent** (`app/agents/source_manager.py`): TTL, `ingest_document/file/image/web`, `language` persist
+- **DocumentAgent**: pdfplumber page blocks
+- **FileAgent**: `docx` paragraphs + tables, `pptx` slides
+- **ImageAgent**: preprocess resize 4096 → JPEG 85 → Vision OCR (OpenRouter vision → Felo → Gemini fallback)
+- **WebAgent**: strips `script/style/nav/footer`, `MAX_WEB_WORDS=2500`
 
-### Phase 5: Editorial Refinement
-The **Refinement Agent** acts as the Editor-in-Chief. It checks for:
-- **Tone Consistency**: Ensuring a Medical FAQ sounds professional.
-- **Clarity**: Removing AI-generated fluff.
-- **Formatting**: Ensuring the output is valid JSON for the UI to render.
+### 2. Intelligence Layer
+- **LanguageAgent**: heuristic unicode + `langdetect` + map to `hi/ta/ml/gu/mr/bn/te/kn/en`
+- **DomainAgent**: cosine-sim categories, `generate_title` (5 words)
+- **ChunkingAgent**: `GEMINI_EMBED_MODEL` or `OX_EMBED_MODEL`, `CHUNK_SIZE=250`
+- **TranslatorAgent**: mode-aware JSON translate, `clean_answer_text` safe
 
-## 📦 State Management & Persistence
+### 3. Generation Squad
+- **SuperAgent**: FAQ batch, forbids chunk leaks, `clean_answer_text`
+- **FlashcardAgent**: flashcards without hint, flip UI
+- **QuizAgent**: MCQ 4 options, `correct_index`, explanation
 
-- **Task Manager**: Manages the lifecycle of a generation (Queued -> Processing -> Completed/Failed).
-- **MongoDB Atlas**: Stores the final results and user history with a 7-day TTL (Time-To-Live) for automatic cleanup.
-- **Background Worker**: All heavy lifting is done in a separate thread to keep the API responsive and prevent timeouts.
+### 4. LLM Client
+`app/llm/llm_client.py` — provider `openrouter > felo > ox > gemini` auto (`LLM_PROVIDER=auto`), `AsyncOpenAI` for OpenRouter/Felo/OX with `reasoning.enabled`, Gemini via `httpx`. Quota/404 → auto-fallback to Gemini `gemini-2.5-flash`. Vision via `chat_vision_ox`.
+
+## 📦 Persistence & UI
+
+- **VectorStore**: `FAISSStore` (`IndexFlatL2`, per-task)
+- **Text Cleaner**: `clean_text`, `clean_blocks`, `clean_answer_text` (strips `As mentioned in Chunk...`, `(Translated)`, fixes `. he → . He`)
+- **Static UI** (`static/index.html`): `step-1` ingest, `step-2` customize (mode-chip, lang-select, topic-chip, qty), `step-3` loader, `step-4` single-chat with `chat-switcher` + `translate-btn`, `chatCache`, `pollTimer`, grouped history by `source_id`
 
 ---
-*AquilaFAQ: Transforming information into intelligence.*
+*Aquila Learn: Transform any source into a language-aware study chat.*
