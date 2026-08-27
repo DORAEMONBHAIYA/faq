@@ -89,7 +89,6 @@ faq/
 │   ├── utils/text_cleaner.py      # clean_text, clean_answer_text (chunk-ref strip)
 │   └── vectorstore/faiss_store.py # IndexFlatL2
 ├── static/index.html       # Single-chat UI, mode switcher, translate toggle, mobile responsive
-└── TASK.md                 # Upgrade tracker
 ```
 
 ---
